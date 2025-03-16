@@ -1,4 +1,5 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -122,6 +123,7 @@
 
                     <!-- Accepting Referrals -->
                     <h5>Accepting Referrals?</h5>
+                    <label for="accepting-referrals">Accepting Referrals</label>
                     <select id="accepting-referrals" style="font-size: 20px;">
                         <option value="no">No</option>
                         <option value="yes">Yes</option>
@@ -149,6 +151,68 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript to handle agency click and details display -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const agencyItems = document.querySelectorAll('.agency-item');
+            const agencyDetailsSection = document.getElementById('agency-details');
+            const agencyDetailForm = document.getElementById('agency-detail-form');
+            const agencyNameElement = document.getElementById('agency-name');
+            const lastUpdatedElement = document.getElementById('last-updated');
+            const servicesProvidedElement = document.getElementById('services-provided');
+            const referralCountContainer = document.getElementById('referral-count-container');
+            const referralServicesContainer = document.getElementById('referral-services-container');
+            const submitButton = document.getElementById('submit-agency-form');
+
+            // Add event listener to each agency item
+            agencyItems.forEach(function (agencyItem) {
+                agencyItem.addEventListener('click', function () {
+                    const agencyId = agencyItem.getAttribute('data-agency-id');
+
+                    // Fetch agency details using AJAX (you can adjust this based on how you're storing the agency data)
+                    fetch(`/api/agency/${agencyId}/`)  // Adjust this endpoint based on your actual routing
+                        .then(response => response.json())
+                        .then(data => {
+                            // Show agency details in the right section
+                            agencyNameElement.textContent = data.agency_name;
+                            lastUpdatedElement.textContent = data.last_updated;
+                            servicesProvidedElement.innerHTML = data.services_provided.map(service =>
+                                `<div class="form-check"><input type="checkbox" class="form-check-input" checked disabled> <label class="form-check-label">${service}</label></div>`
+                            ).join('');
+
+                            // Set the referral count and services based on the agency's accepting referrals status
+                            if (data.accepting_referrals === 'yes') {
+                                referralCountContainer.style.display = 'block';
+                                referralServicesContainer.style.display = 'block';
+                                document.getElementById('accepting-referrals').value = 'yes';
+                                document.getElementById('referral-services').innerHTML = data.referral_services.map(service =>
+                                    `<div class="form-check"><input type="checkbox" class="form-check-input" checked disabled> <label class="form-check-label">${service}</label></div>`
+                                ).join('');
+                            } else {
+                                referralCountContainer.style.display = 'none';
+                                referralServicesContainer.style.display = 'none';
+                                document.getElementById('accepting-referrals').value = 'no';
+                            }
+
+                            // Show the form and "Save Details" button (if it's for agency owners)
+                            agencyDetailForm.style.display = 'block';
+                            submitButton.style.display = 'inline-block';
+                        })
+                        .catch(error => {
+                            console.error('Error fetching agency details:', error);
+                        });
+                });
+            });
+
+            // Handle form submission if needed
+            submitButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                // Save details logic (you can add your form submission here)
+                alert('Agency details saved!');
+            });
+        });
+    </script>
 
 </body>
 </html>

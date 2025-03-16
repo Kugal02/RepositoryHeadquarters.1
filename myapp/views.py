@@ -27,10 +27,6 @@ def logout_view(request):
     messages.success(request, "You have been logged out successfully.")
     return redirect('login')
 
-# Home View (Optional)
-def home_view(request):
-    return HttpResponse("Welcome to the Home Page!")
-
 # Dashboard View (Protected - Requires Login)
 @login_required
 def dashboard_view(request):
@@ -61,12 +57,31 @@ def agency_details(request, agency_id):
     # Prepare the data to send back to the frontend
     data = {
         "agency_name": agency.agency_name,
-        "services_provided": agency_detail.services_provided if agency_detail else [],
         "accepting_referrals": agency_detail.accepting_referrals,
         "referral_services": agency_detail.referral_services if agency_detail else [],
         "last_updated": agency_detail.last_updated.strftime("%Y-%m-%d %H:%M:%S") if agency_detail else "Never Updated",
         "is_owner": is_owner,  # Send permission flag to frontend
+
+        # Replace services_provided with individual boolean fields
+        "services_provided": [
+            "Job Development" if agency_detail.job_development else "",
+            "Employment Path-Community" if agency_detail.employment_path_community else "",
+            "Employment Path Solo" if agency_detail.employment_path_solo else "",
+            "Job Coaching (VR)" if agency_detail.job_coaching_vr else "",
+            "Job Coaching (ODDS)" if agency_detail.job_coaching_odds else "",
+            "Career Exploration" if agency_detail.career_exploration else "",
+            "Targeted Vocational Assessments" if agency_detail.targeted_vocational_assessments else "",
+            "Community Based Work Assessments" if agency_detail.community_based_work_assessments else "",
+            "Job Retention" if agency_detail.job_retention else "",
+            "Discovery" if agency_detail.discovery else "",
+            "DSA (Facility)" if agency_detail.dsa_facility else "",
+            "DSA (Community)" if agency_detail.dsa_community else "",
+            "ADL/IADL" if agency_detail.adl_iadl else ""
+        ]
     }
+
+    # Remove empty values
+    data["services_provided"] = [service for service in data["services_provided"] if service]
 
     return JsonResponse(data)
 
@@ -100,4 +115,4 @@ def signup_view(request):
 
 # Terms of Service View
 def terms(request):
-    return render(request, 'myapp/terms.html')  # Ensure that this template exists in your project
+    return render(request, 'myapp/terms.html')

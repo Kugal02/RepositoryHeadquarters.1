@@ -51,6 +51,12 @@ class AgencyDetailForm(forms.ModelForm):
     )
 
     accepting_referrals = forms.BooleanField(required=False)
+    referral_limit = forms.IntegerField(
+        required=False,
+        min_value=1,
+        max_value=10,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Max referrals (1-10)'})
+    )
     referral_services = forms.MultipleChoiceField(
         choices=SERVICE_CHOICES,
         widget=forms.CheckboxSelectMultiple,
@@ -59,4 +65,4 @@ class AgencyDetailForm(forms.ModelForm):
 
     class Meta:
         model = AgencyDetail
-        fields = ['services_provided', 'accepting_referrals', 'referral_services']  # List the fields you want to display
+        fields = ['services_provided', 'accepting_referrals', 'referral_limit', 'referral_services']  # List the fields you want to display

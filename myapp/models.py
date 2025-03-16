@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator
 
 # Define service choices globally, outside of any class
 SERVICE_CHOICES = [
@@ -30,8 +31,6 @@ class Profile(models.Model):
 class AgencyDetail(models.Model):
     agency = models.OneToOneField(User, on_delete=models.CASCADE, related_name="agency_detail")
 
-    services_provided = models.JSONField(default=list)  # Stores list of selected services
-
     # Boolean fields for each service
     job_development = models.BooleanField(default=False)
     employment_path_community = models.BooleanField(default=False)
@@ -51,8 +50,12 @@ class AgencyDetail(models.Model):
     accepting_referrals = models.BooleanField(default=False)
 
     # New number field to track the number of referrals accepted (max 10)
-    referral_limit = models.PositiveIntegerField(default=10)  # You can set a max value constraint later in the form
+    referral_limit = models.PositiveIntegerField(
+        default=10,
+        validators=[MaxValueValidator(10)]  # Restrict referral limit to a max of 10
+    )
 
+    # Referral services list
     referral_services = models.JSONField(default=list)  # Store list of selected referral services
 
     last_updated = models.DateTimeField(auto_now=True)  # Auto-updates whenever the form is saved
