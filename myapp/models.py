@@ -51,7 +51,7 @@ class AgencyDetail(models.Model):
 
     # New number field to track the number of referrals accepted (max 10)
     referral_limit = models.PositiveIntegerField(
-        default=10,
+        default=0,
         validators=[MaxValueValidator(10)]  # Restrict referral limit to a max of 10
     )
 

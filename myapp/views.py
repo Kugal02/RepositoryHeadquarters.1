@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import LoginForm, SignUpForm, AgencyDetailForm
 from .models import Profile, AgencyDetail
 
+
 # Login View
 def login_view(request):
     form = LoginForm(request, data=request.POST) if request.method == 'POST' else LoginForm()
@@ -21,11 +22,13 @@ def login_view(request):
 
     return render(request, 'myapp/login.html', {'form': form})
 
+
 # Logout View
 def logout_view(request):
     logout(request)
     messages.success(request, "You have been logged out successfully.")
     return redirect('login')
+
 
 # Dashboard View (Protected - Requires Login)
 @login_required
@@ -33,15 +36,18 @@ def dashboard_view(request):
     agencies = Profile.objects.all().order_by("agency_name")  # Fetch agencies
     return render(request, 'myapp/dashboard.html', {'agencies': agencies})
 
+
 # API: Get or Update Agency Details (AJAX Call)
 @login_required
 def agency_details(request, agency_id):
     # Fetch the agency profile
     agency = get_object_or_404(Profile, id=agency_id)
+
     # Get or create agency details
     agency_detail, created = AgencyDetail.objects.get_or_create(agency=agency.user)
 
-    is_owner = request.user == agency.user  # Check if the logged-in user is the owner
+    # Check if the logged-in user is the owner of the agency
+    is_owner = request.user == agency.user  # True if the logged-in user is the owner
 
     if request.method == 'POST':
         if not is_owner:  # Prevent non-owners from editing
@@ -121,6 +127,7 @@ def signup_view(request):
         form = SignUpForm()
 
     return render(request, 'myapp/signup.html', {'form': form})
+
 
 # Terms of Service View
 def terms(request):
