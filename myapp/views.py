@@ -1,8 +1,8 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import LoginForm, SignUpForm, AgencyDetailForm
 from .models import Profile, AgencyDetail
 
@@ -64,26 +64,35 @@ def agency_details(request, agency_id):
 
         # Replace services_provided with individual boolean fields
         "services_provided": [
-            "Job Development" if agency_detail.job_development else "",
-            "Employment Path-Community" if agency_detail.employment_path_community else "",
-            "Employment Path Solo" if agency_detail.employment_path_solo else "",
-            "Job Coaching (VR)" if agency_detail.job_coaching_vr else "",
-            "Job Coaching (ODDS)" if agency_detail.job_coaching_odds else "",
-            "Career Exploration" if agency_detail.career_exploration else "",
-            "Targeted Vocational Assessments" if agency_detail.targeted_vocational_assessments else "",
-            "Community Based Work Assessments" if agency_detail.community_based_work_assessments else "",
-            "Job Retention" if agency_detail.job_retention else "",
-            "Discovery" if agency_detail.discovery else "",
-            "DSA (Facility)" if agency_detail.dsa_facility else "",
-            "DSA (Community)" if agency_detail.dsa_community else "",
-            "ADL/IADL" if agency_detail.adl_iadl else ""
+            "Job Development" if agency_detail.job_development else None,
+            "Employment Path-Community" if agency_detail.employment_path_community else None,
+            "Employment Path Solo" if agency_detail.employment_path_solo else None,
+            "Job Coaching (VR)" if agency_detail.job_coaching_vr else None,
+            "Job Coaching (ODDS)" if agency_detail.job_coaching_odds else None,
+            "Career Exploration" if agency_detail.career_exploration else None,
+            "Targeted Vocational Assessments" if agency_detail.targeted_vocational_assessments else None,
+            "Community Based Work Assessments" if agency_detail.community_based_work_assessments else None,
+            "Job Retention" if agency_detail.job_retention else None,
+            "Discovery" if agency_detail.discovery else None,
+            "DSA (Facility)" if agency_detail.dsa_facility else None,
+            "DSA (Community)" if agency_detail.dsa_community else None,
+            "ADL/IADL" if agency_detail.adl_iadl else None
         ]
     }
 
-    # Remove empty values
+    # Remove None values from the services_provided list (if there are no services)
     data["services_provided"] = [service for service in data["services_provided"] if service]
 
+    # If there are no services, ensure services_provided is still an empty list
+    if not data["services_provided"]:
+        data["services_provided"] = []
+
+    # Ensure referral_count is included if accepting referrals
+    if agency_detail.accepting_referrals:
+        data["referral_count"] = agency_detail.referral_limit  # Add referral limit count
+
     return JsonResponse(data)
+
 
 # Sign-Up View (Fix Profile Saving)
 def signup_view(request):

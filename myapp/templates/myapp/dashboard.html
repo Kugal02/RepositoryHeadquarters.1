@@ -152,7 +152,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- JavaScript to handle agency click and details display -->
+    <!-- Updated JavaScript to handle agency click and details display -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const agencyItems = document.querySelectorAll('.agency-item');
@@ -163,6 +163,7 @@
             const servicesProvidedElement = document.getElementById('services-provided');
             const referralCountContainer = document.getElementById('referral-count-container');
             const referralServicesContainer = document.getElementById('referral-services-container');
+            const referralCountElement = document.getElementById('referral-count');
             const submitButton = document.getElementById('submit-agency-form');
 
             // Add event listener to each agency item
@@ -170,25 +171,35 @@
                 agencyItem.addEventListener('click', function () {
                     const agencyId = agencyItem.getAttribute('data-agency-id');
 
-                    // Fetch agency details using AJAX (you can adjust this based on how you're storing the agency data)
-                    fetch(`/api/agency/${agencyId}/`)  // Adjust this endpoint based on your actual routing
+                    // Fetch agency details using AJAX
+                    fetch(`/api/agency/${agencyId}/`)
                         .then(response => response.json())
                         .then(data => {
-                            // Show agency details in the right section
                             agencyNameElement.textContent = data.agency_name;
                             lastUpdatedElement.textContent = data.last_updated;
-                            servicesProvidedElement.innerHTML = data.services_provided.map(service =>
-                                `<div class="form-check"><input type="checkbox" class="form-check-input" checked disabled> <label class="form-check-label">${service}</label></div>`
-                            ).join('');
+
+                            // Show services if any are provided
+                            if (data.services_provided && data.services_provided.length > 0) {
+                                servicesProvidedElement.innerHTML = data.services_provided.map(service =>
+                                    `<div class="form-check"><input type="checkbox" class="form-check-input" checked disabled> <label class="form-check-label">${service}</label></div>`
+                                ).join('');
+                            } else {
+                                servicesProvidedElement.innerHTML = '<p>No services provided listed.</p>';
+                            }
 
                             // Set the referral count and services based on the agency's accepting referrals status
-                            if (data.accepting_referrals === 'yes') {
+                            if (data.accepting_referrals) {
                                 referralCountContainer.style.display = 'block';
                                 referralServicesContainer.style.display = 'block';
                                 document.getElementById('accepting-referrals').value = 'yes';
-                                document.getElementById('referral-services').innerHTML = data.referral_services.map(service =>
-                                    `<div class="form-check"><input type="checkbox" class="form-check-input" checked disabled> <label class="form-check-label">${service}</label></div>`
-                                ).join('');
+                                referralCountElement.value = data.referral_count;  // Show referral count
+                                if (data.referral_services && data.referral_services.length > 0) {
+                                    document.getElementById('referral-services').innerHTML = data.referral_services.map(service =>
+                                        `<div class="form-check"><input type="checkbox" class="form-check-input" checked disabled> <label class="form-check-label">${service}</label></div>`
+                                    ).join('');
+                                } else {
+                                    document.getElementById('referral-services').innerHTML = '<p>No referral services available.</p>';
+                                }
                             } else {
                                 referralCountContainer.style.display = 'none';
                                 referralServicesContainer.style.display = 'none';
