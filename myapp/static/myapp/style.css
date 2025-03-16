@@ -1,0 +1,141 @@
+/* Default background for login & signup pages */
+body {
+    font-family: Arial, sans-serif;
+    background: url("Marion1.jpg") no-repeat center center fixed;
+    background-size: cover; /* This ensures the background image covers the entire screen */
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Apply flexbox ONLY on login & signup pages */
+.signup-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Adjust the container to fit on the page without scrolling */
+.signup-page .container {
+    width: 100%;
+    max-width: 700px; /* Make the container wider */
+    height: 95vh; /* Taller container to fit content */
+    padding: 30px;
+    overflow-y: auto; /* Allow scrolling inside if needed */
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin: auto;
+}
+
+/* Custom Title Style (H2) */
+.signup-page h2 {
+    font-size: 1.75rem; /* Slightly smaller title */
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Style clickable agency names in the list */
+#agency-list .agency-item {
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Change background & text color when hovering over agency names */
+#agency-list .agency-item:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Compact layout for checkboxes in services section */
+#services-provided, #referral-services {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    row-gap: 2px;
+}
+
+/* Reduce spacing between checkboxes & text */
+#services-provided label,
+#referral-services label {
+    display: flex;
+    align-items: center;
+    margin: 0 !important;
+    padding: 0px 5px;
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Reduce checkbox size & spacing */
+#services-provided input[type="checkbox"],
+#referral-services input[type="checkbox"] {
+    margin: 0px 3px 0px 0 !important;
+    transform: scale(0.8);
+    vertical-align: middle;
+}
+
+/* Reduce spacing inside the form */
+#agency-detail-form {
+    padding: 10px;
+}
+
+/* Ensure checkboxes are inline */
+#services-provided .form-check,
+#referral-services .form-check {
+    display: inline-flex;
+    align-items: center;
+    margin: 2px 5px 2px 0;
+}
+
+/* Style the logo */
+.logo {
+    width: 350px;
+    max-width: 100%;
+    margin-bottom: 15px;
+}
+
+/* Style the form inputs */
+form input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Bold all the labels to make fields easier to see */
+label {
+    font-weight: bold; /* Bold all labels */
+}
+
+/* Style the login button */
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Custom Bold Text Class */
+.bold-text {
+    font-weight: bold;
+}
+
+/* Custom style for the "I Agree" button */
+.agree-btn {
+    width: 1in; /* Set button width to 1 inch */
+    padding: 10px;
+    text-align: center;
+}

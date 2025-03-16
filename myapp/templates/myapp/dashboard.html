@@ -1,0 +1,154 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'myapp/style.css' %}">
+
+    <style>
+        /* Set background image */
+        .dashboard-page {
+            background: url("{% static 'myapp/background1.jpg' %}") no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        /* Hover effect for agency list items */
+        .agency-item {
+            cursor: pointer;
+            transition: background 0.3s ease-in-out;
+            color: #007bff; /* Blue color */
+        }
+        .agency-item:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        /* Ensure services are aligned vertically and to the left */
+        #services-provided, #referral-services {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+            padding-left: 0;
+            margin-left: 0;
+            width: 100%;
+        }
+
+        /* Ensure checkboxes and labels are aligned left */
+        #services-provided label, #referral-services label {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        /* Adjust spacing between the checkbox and label */
+        #services-provided input, #referral-services input {
+            margin-right: 5px;
+            margin-left: 0;
+        }
+
+        /* Color agency name */
+        #agency-name {
+            color: dodgerblue;
+        }
+
+        /* Services provided list */
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        /* Agency list styling */
+        .agency-item {
+            color: #007bff;
+        }
+
+        .agency-item:hover {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="dashboard-page">
+
+    <div class="container-fluid">
+        <!-- Header Section with Logout Button -->
+        <div class="row bg-primary text-white p-3 d-flex align-items-center">
+            <div class="col">
+                <h2>Provider Agency Dashboard</h2>
+            </div>
+            <div class="col-auto">
+                <a href="{% url 'logout' %}" class="btn btn-light">Logout</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Section (Agency List) -->
+            <div class="col-md-3 border-end p-3" id="agency-list">
+                <h4 class="text-center">Agency List</h4>
+                <ul class="list-group">
+                    {% for agency in agencies %}
+                        <li class="list-group-item agency-item text-center"
+                            data-agency-id="{{ agency.id }}">
+                            {{ agency.agency_name }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Right Section (Agency Details + Form) -->
+            <div class="col-md-9 p-3" id="agency-details">
+                <h4>Agency Details</h4>
+                <p>Select an agency to view or update details.</p>
+
+                <form id="agency-detail-form" method="post" style="display: none;">
+                    {% csrf_token %}
+
+                    <h5 class="text-center"><strong>Agency Information</strong></h5>
+                    <p><strong style="font-size: 20px;">Agency Name:</strong> <span id="agency-name" style="font-size: 20px;"></span></p>
+                    <p><strong>Last update by provider agency:</strong> <span id="last-updated" style="font-size: 16px;"></span></p>
+
+                    <!-- SERVICES PROVIDED -->
+                    <h5>Services Provided</h5>
+                    <div id="services-provided"></div>
+
+                    <!-- Accepting Referrals -->
+                    <h5>Accepting Referrals?</h5>
+                    <select id="accepting-referrals" style="font-size: 20px;">
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+
+                    <!-- Referral Count (Only appears if "Yes" is selected) -->
+                    <div id="referral-count-container" style="display: none; max-width: 400px;">
+                        <label for="referral-count" style="color: red;"># of Referrals we can accept:</label>
+                        <input type="number" id="referral-count" name="referral_count" min="1" max="10" style="width: 50%; max-width: 150px;">
+                    </div>
+
+                    <!-- Services Accepting Referrals (Only appears if "Yes" is selected) -->
+                    <div id="referral-services-container" style="display: none;">
+                        <h5>Services we are accepting referrals for:</h5>
+                        <div id="referral-services"></div>
+                    </div>
+
+                    <!-- Submit button (Only for agency owners) -->
+                    <button type="submit" id="submit-agency-form" class="btn btn-success mt-3" style="display: none; max-width: 200px;">Save Details</button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

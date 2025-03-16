@@ -1,0 +1,81 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'myapp/style.css' %}">
+</head>
+<body>
+    <div class="container mt-5">
+
+        <div class="card shadow-lg p-3">
+            <h2 class="text-center">Terms of Service</h2>
+            <div class="card-body">
+                <!-- Add your terms of service content here -->
+                <h5 class="card-title" style="color: red;"><strong>Agreement</strong></h5>
+                <p class="card-text">
+                <strong>1. Acceptance of Terms</strong><br>
+                 By accessing or using our platform, you agree to comply with these Terms. If you do not agree, please refrain from using the service.
+                 <br>
+                 <strong>2. Description of Services</strong><br>
+                    The Marion County Provider Agency Portal is an online platform that allows provider agencies to post their vacancies, update their referral status, and manage their service listings.
+                    This platform is a free service created to support the collaborative work of IDD providers in Marion County, Oregon. This site is not affiliated with any corporation, LLC, or business entity.
+                    This site does not endorse or verify any agency or provider. The use of this platform does not establish a contractual relationship between providers and service users.
+                    <br>
+                    <strong>3. User Responsibilities - Users agree to</strong>
+                    <ul>
+                        <li>Provide accurate and updated information.</li>
+                        <li>Not misrepresent their services.</li>
+                        <li>Abide by all applicable laws and regulations.</li>
+                        <li>Not use the platform for fraudulent or illegal activities.</li>
+                    </ul>
+                    <strong>4. Account Management</strong><br>
+                    Users are responsible for maintaining the confidentiality of their login credentials.
+                    <br>
+                    Providers may update their listings and referral statuses as needed.
+                    <br>
+                    Inactive accounts (not updated in 30+ days) may be deactivated.
+                     <br>
+                    <strong>5. Limitation of Liability</strong><br>
+                    Provider Agencies are responsible for:
+                    <ul>
+                    <li>The accuracy of provider listings.</li>
+                    <li>The quality or availability of any service listed.</li>
+                    <li>Any disputes between providers and users.</li>
+                    </ul>
+                    <strong>6. Termination of Use</strong><br>
+                    Provider Agencies are subject to termination or suspension from this site if any of their actions and/or conduct violates these Terms, provides false information, or engages in misconduct.
+                    <br>
+                    <strong>7. Privacy and Data Protection</strong><br>
+                    By using the Marion County Provider Agency platform, you acknowledge and consent to the collection and use of your data as outlined in our Privacy Policy. This site does not sell or distribute user data to third parties.
+                    <br>
+                    <strong>8. Changes to Terms</strong><br>
+                    This site may update these Terms from time to time. Users will be notified of any significant changes, and continued use of the platform constitutes acceptance of the revised Terms.
+                    <br>
+                    <strong>9. Governing Law</strong><br>
+                    These Terms are governed by the laws of the state of Oregon. Any disputes will be resolved through arbitration or the courts of Marion County, Oregon.
+                    <br>
+                    <strong>10. Contact Information</strong><br>
+                    If you have any questions about these Terms, please contact us at email@email.com.
+
+        <div class="text-center mt-3">
+    <form method="post" action="{% url 'signup' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary agree-btn">I Agree</button>
+    </form>
+</div>
+
+            </div>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
