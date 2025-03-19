@@ -53,7 +53,7 @@ class AgencyDetailForm(forms.ModelForm):
     accepting_referrals = forms.BooleanField(required=False)
     referral_limit = forms.IntegerField(
         required=False,
-        min_value=1,
+        min_value=0,
         max_value=10,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Max referrals (1-10)'})
     )

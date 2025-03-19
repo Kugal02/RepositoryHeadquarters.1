@@ -1,141 +1,123 @@
-/* Default background for login & signup pages */
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
-    background: url("Marion1.jpg") no-repeat center center fixed;
-    background-size: cover; /* This ensures the background image covers the entire screen */
-    min-height: 100vh;
-    margin: 0;
 }
 
-/* Apply flexbox ONLY on login & signup pages */
-.signup-page {
+/* Dashboard Background */
+.dashboard-page {
+    background-image: url("/static/myapp/background1.jpg") no-repeat center center;
+        background-size: cover;
+
+    color: #ffffff;  /* Light text color for visibility */
+    min-height: 100vh;  /* Ensure full height */
+    margin: 0;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+    flex-direction: column;
+}
+
+/* Header Section for Dashboard */
+.dashboard-page .row.bg-primary {
+    background-color: rgba(0, 123, 255, 0.8);  /* Slightly transparent primary color for header */
+    color: white;
     padding: 20px;
 }
 
-/* Adjust the container to fit on the page without scrolling */
-.signup-page .container {
-    width: 100%;
-    max-width: 700px; /* Make the container wider */
-    height: 95vh; /* Taller container to fit content */
+/* Login and Signup Page Background */
+.signup-page, .login-page {
+    background: url('/static/myapp/Marion1.jpg') no-repeat center center;
+    background-size: cover;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;  /* Ensure text is visible on background */
+}
+
+/* Semi-transparent background for Signup and Login Forms */
+.signup-form-container, .login-form-container {
+    background: rgba(0, 0, 0, 0.6); /* Dark semi-transparent background */
     padding: 30px;
-    overflow-y: auto; /* Allow scrolling inside if needed */
-    background: white;
     border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    margin: auto;
-}
-
-/* Custom Title Style (H2) */
-.signup-page h2 {
-    font-size: 1.75rem; /* Slightly smaller title */
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-/* Style clickable agency names in the list */
-#agency-list .agency-item {
-    cursor: pointer;
-    transition: background 0.3s ease, color 0.3s ease;
-}
-
-/* Change background & text color when hovering over agency names */
-#agency-list .agency-item:hover {
-    background-color: #007bff;
-    color: white;
-}
-
-/* Compact layout for checkboxes in services section */
-#services-provided, #referral-services {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
-    row-gap: 2px;
-}
-
-/* Reduce spacing between checkboxes & text */
-#services-provided label,
-#referral-services label {
-    display: flex;
-    align-items: center;
-    margin: 0 !important;
-    padding: 0px 5px;
-    font-size: 13px;
-    line-height: 1;
-    white-space: nowrap;
-}
-
-/* Reduce checkbox size & spacing */
-#services-provided input[type="checkbox"],
-#referral-services input[type="checkbox"] {
-    margin: 0px 3px 0px 0 !important;
-    transform: scale(0.8);
-    vertical-align: middle;
-}
-
-/* Reduce spacing inside the form */
-#agency-detail-form {
-    padding: 10px;
-}
-
-/* Ensure checkboxes are inline */
-#services-provided .form-check,
-#referral-services .form-check {
-    display: inline-flex;
-    align-items: center;
-    margin: 2px 5px 2px 0;
-}
-
-/* Style the logo */
-.logo {
-    width: 350px;
-    max-width: 100%;
-    margin-bottom: 15px;
-}
-
-/* Style the form inputs */
-form input {
+    max-width: 500px;
     width: 100%;
-    padding: 10px;
-    margin: 10px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Form Inputs & Buttons for Signup and Login */
+.signup-form-container input,
+.signup-form-container select,
+.signup-form-container button,
+.login-form-container input,
+.login-form-container select,
+.login-form-container button {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
     border: 1px solid #ccc;
     border-radius: 5px;
-}
-
-/* Bold all the labels to make fields easier to see */
-label {
-    font-weight: bold; /* Bold all labels */
-}
-
-/* Style the login button */
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    border: none;
-    color: white;
     font-size: 16px;
-    border-radius: 5px;
+}
+
+/* Dashboard List Items Hover Effect */
+.agency-item:hover {
+    background-color: #007bff !important; /* Blue on hover */
+    color: white !important;
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: background-color 0.3s ease-in-out;
 }
 
-button:hover {
-    background-color: #0056b3;
+/* Adjustments for Mobile */
+@media (max-width: 767px) {
+    .dashboard-page .row {
+        flex-direction: column;
+    }
+
+    .signup-form-container, .login-form-container {
+        padding: 20px;
+    }
 }
 
-/* Custom Bold Text Class */
-.bold-text {
-    font-weight: bold;
+/* Ensure "Accepting Referrals" label and select are on the same line */
+#accepting-referrals-container {
+    display: flex !important;
+    align-items: center;
+    margin-bottom: 16px; /* Adds spacing below */
 }
 
-/* Custom style for the "I Agree" button */
-.agree-btn {
-    width: 1in; /* Set button width to 1 inch */
-    padding: 10px;
-    text-align: center;
+/* Adjust dropdown size and text */
+#accepting-referrals {
+    height: 25px;  /* Reduce height */
+    font-weight: bold; /* Make text bold */
+    text-align: left; /* Center align text */
+    width: 70px;  /* Adjust width to fit better */
+    padding: 2px 5px; /* Adjust padding for a smaller height */
 }
+
+/* Style the dropdown */
+#accepting-referrals {
+    height: 30px;  /* Adjust height */
+    font-weight: bold; /* Make text bold */
+    text-align: center; /* Center align text horizontally */
+    width: 75px!Important;  /* Make it narrower */
+    padding: 0px; /* Remove extra padding */
+    border: 0px solid #ccc; /* Default border */
+    transition: background-color 0.3s ease-in-out; /* Smooth color transition */
+    display: flex;  /* Make dropdown a flex container */
+    align-items: left;  /* Center text vertically */
+    justify-content: center; /* Center text horizontally */
+    text-align-last: left; /* Ensure text stays centered in dropdown */
+}
+
+/* Background color for No */
+#accepting-referrals.no {
+    color: Red !important;
+
+}
+
+/* Background color for Yes */
+#accepting-referrals.yes {
+    color: darkgreen !important;
+
+}
+
+

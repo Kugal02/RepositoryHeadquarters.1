@@ -10,6 +10,7 @@ urlpatterns = [
 
     # API Route for agency details (this is the API endpoint your JS is calling)
     path('api/agency/<int:agency_id>/', agency_details, name='get_agency_details'),  # API route for agency details
+    path('api/agency/<int:agency_id>/', agency_details, name='agency_details'),
 
     # Password reset views
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),

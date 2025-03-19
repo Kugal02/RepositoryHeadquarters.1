@@ -1,3 +1,5 @@
+import logging
+import json
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -6,6 +8,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import LoginForm, SignUpForm, AgencyDetailForm
 from .models import Profile, AgencyDetail
 
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Login View
 def login_view(request):
@@ -15,13 +19,11 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            messages.success(request, "Login successful! Welcome back.")
             return redirect('dashboard')  # Redirect to dashboard
         else:
             messages.error(request, "Invalid username or password. Please try again.")
 
     return render(request, 'myapp/login.html', {'form': form})
-
 
 # Logout View
 def logout_view(request):
@@ -29,84 +31,72 @@ def logout_view(request):
     messages.success(request, "You have been logged out successfully.")
     return redirect('login')
 
-
 # Dashboard View (Protected - Requires Login)
 @login_required
 def dashboard_view(request):
-    agencies = Profile.objects.all().order_by("agency_name")  # Fetch agencies
-    return render(request, 'myapp/dashboard.html', {'agencies': agencies})
+    agencies = Profile.objects.all().order_by("agency_name")  # Fetch agencies in alphabetical order
 
+    # Filter agencies based on accepting referrals status
+    accepting_referrals = request.GET.get('accepting_referrals', '')
+    if accepting_referrals:
+        agencies = agencies.filter(agencydetail__accepting_referrals=(accepting_referrals.lower() == 'yes'))
+
+    return render(request, 'myapp/dashboard.html', {'agencies': agencies})
 
 # API: Get or Update Agency Details (AJAX Call)
 @login_required
+@login_required
 def agency_details(request, agency_id):
-    # Fetch the agency profile
-    agency = get_object_or_404(Profile, id=agency_id)
+    logger.info(f"Received request for agency ID: {agency_id}")
 
-    # Get or create agency details
-    agency_detail, created = AgencyDetail.objects.get_or_create(agency=agency.user)
+    try:
+        # Ensure Profile exists
+        agency = get_object_or_404(Profile, id=agency_id)
 
-    # Check if the logged-in user is the owner of the agency
-    is_owner = request.user == agency.user  # True if the logged-in user is the owner
+        # Ensure AgencyDetail exists for the agency
+        agency_detail, created = AgencyDetail.objects.get_or_create(agency=agency.user)
 
-    if request.method == 'POST':
-        if not is_owner:  # Prevent non-owners from editing
-            return JsonResponse({"error": "You do not have permission to edit this agency."}, status=403)
+        # Handle GET request (fetch agency details)
+        if request.method == "GET":
+            data = {
+                "agency_name": agency.agency_name or "No Name Provided",
+                "accepting_referrals": agency_detail.accepting_referrals,
+                "last_updated": agency_detail.last_updated.strftime(
+                    "%m/%d/%Y %I:%M %p") if agency_detail.last_updated else "Never Updated",
+            }
 
-        form = AgencyDetailForm(request.POST, instance=agency_detail)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({"message": "Agency details updated successfully!"})
-        else:
-            return JsonResponse({"errors": form.errors}, status=400)
+            return JsonResponse(data)
 
-    # Prepare the data to send back to the frontend
-    data = {
-        "agency_name": agency.agency_name,
-        "accepting_referrals": agency_detail.accepting_referrals,
-        "referral_services": agency_detail.referral_services if agency_detail else [],
-        "last_updated": agency_detail.last_updated.strftime("%Y-%m-%d %H:%M:%S") if agency_detail else "Never Updated",
-        "is_owner": is_owner,  # Send permission flag to frontend
+        # Handle POST request (update accepting referrals)
+        if request.method == "POST":
+            try:
+                data = json.loads(request.body)
+                agency_detail.accepting_referrals = data.get("accepting_referrals", False)
+                agency_detail.save()
 
-        # Replace services_provided with individual boolean fields
-        "services_provided": [
-            "Job Development" if agency_detail.job_development else None,
-            "Employment Path-Community" if agency_detail.employment_path_community else None,
-            "Employment Path Solo" if agency_detail.employment_path_solo else None,
-            "Job Coaching (VR)" if agency_detail.job_coaching_vr else None,
-            "Job Coaching (ODDS)" if agency_detail.job_coaching_odds else None,
-            "Career Exploration" if agency_detail.career_exploration else None,
-            "Targeted Vocational Assessments" if agency_detail.targeted_vocational_assessments else None,
-            "Community Based Work Assessments" if agency_detail.community_based_work_assessments else None,
-            "Job Retention" if agency_detail.job_retention else None,
-            "Discovery" if agency_detail.discovery else None,
-            "DSA (Facility)" if agency_detail.dsa_facility else None,
-            "DSA (Community)" if agency_detail.dsa_community else None,
-            "ADL/IADL" if agency_detail.adl_iadl else None
-        ]
-    }
+                logger.info(f"Updated 'accepting_referrals' for agency {agency.agency_name} to {agency_detail.accepting_referrals}")
 
-    # Remove None values from the services_provided list (if there are no services)
-    data["services_provided"] = [service for service in data["services_provided"] if service]
+                return JsonResponse({"success": True})
+            except Exception as e:
+                logger.error(f"Error updating agency: {str(e)}")
+                return JsonResponse({"error": "Failed to update agency details."}, status=500)
 
-    # If there are no services, ensure services_provided is still an empty list
-    if not data["services_provided"]:
-        data["services_provided"] = []
-
-    # Ensure referral_count is included if accepting referrals
-    if agency_detail.accepting_referrals:
-        data["referral_count"] = agency_detail.referral_limit  # Add referral limit count
-
-    return JsonResponse(data)
+    except Exception as e:
+        logger.error(f"Error fetching agency details for agency ID {agency_id}: {str(e)}")
+        return JsonResponse({"error": f"Failed to fetch agency details: {str(e)}"}, status=500)
 
 
-# Sign-Up View (Fix Profile Saving)
+    except Exception as e:
+        logger.error(f"Error fetching agency details for agency ID {agency_id}: {str(e)}")
+        return JsonResponse({"error": "Failed to fetch agency details."}, status=500)
+
+# Sign-Up View
 def signup_view(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
             try:
-                user = form.save()  # Save user first
+                user = form.save()
                 Profile.objects.update_or_create(
                     user=user,
                     defaults={
@@ -127,7 +117,6 @@ def signup_view(request):
         form = SignUpForm()
 
     return render(request, 'myapp/signup.html', {'form': form})
-
 
 # Terms of Service View
 def terms(request):

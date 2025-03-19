@@ -83,14 +83,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Password validation
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
-
 # Logging Configuration (Add this part)
 LOGGING = {
     'version': 1,
@@ -116,13 +108,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-USE_TZ = True
-
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 
@@ -132,7 +117,7 @@ STATICFILES_DIRS = [
 ]
 
 # The directory where `collectstatic` will collect all static files (for production)
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # DO NOT point this to your app's static directory!
+STATIC_ROOT = BASE_DIR / 'static'  # DO NOT point this to your app's static directory!
 
 # Media files (for user uploads)
 MEDIA_URL = '/media/'
