@@ -94,30 +94,19 @@
                     <!-- Editable Number of Referrals -->
                     <div class="my-3">
                         <label for="referral-limit-input"><strong>Number of Referrals Accepting:</strong></label>
-                        <input
-                            type="number"
-                            id="referral-limit-input"
-                            class="form-control ms-2"
-                            style="width: 150px;"
-                            min="0"
-                            readonly>
+                        <input type="number" id="referral-limit-input" class="form-control ms-2" style="width: 150px;" min="0" readonly>
                     </div>
                     <!-- Display Services Provided -->
                     <div class="my-3">
                         <strong>Services Provided:</strong>
-                        <ul id="services-provided" class="ms-2">
-                            <!-- Populated dynamically via JavaScript -->
-                        </ul>
+                        <div id="services-provided" class="form-check ms-2">
+                            <!-- Dynamically populated checkboxes via JavaScript -->
+                        </div>
                     </div>
                     <button type="button" id="save-button" class="btn btn-primary mt-3">Save Changes</button>
                 </form>
             </div>
         </div>
-    </div>
-
-    <!-- Popup Message -->
-    <div class="alert alert-success text-center" role="alert" id="save-alert">
-        Changes saved successfully!
     </div>
 
     <!-- JavaScript -->
@@ -131,161 +120,111 @@
             const agencyDetailForm = document.getElementById("agency-detail-form");
             const lastUpdatedElem = document.getElementById("last-updated");
             const saveButton = document.getElementById("save-button");
-            const saveAlert = document.getElementById("save-alert"); // Popup message
-            const searchInput = document.getElementById("search-agencies"); // Search input field
+            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
-            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value; // CSRF token
+            console.log("Dashboard loaded. Initializing event listeners.");
 
-            // Reset dropdown and styles
-            function resetDropdown() {
-                acceptingReferralsDropdown.value = ""; // Reset value
-                acceptingReferralsDropdown.classList.remove("text-green", "text-red"); // Reset classes
-            }
+            // Function to populate services dynamically
+            function populateServices(services, providedServices) {
+                servicesProvidedElem.innerHTML = ""; // Clear previously added services
 
-            // Update dropdown styles based on value
-            function styleDropdown(value) {
-                acceptingReferralsDropdown.classList.remove("text-green", "text-red"); // Clear previous styles
-                if (value === "yes") {
-                    acceptingReferralsDropdown.classList.add("text-green");
-                } else if (value === "no") {
-                    acceptingReferralsDropdown.classList.add("text-red");
-                }
-            }
+                services.forEach(service => {
+                    const isChecked = providedServices.includes(service.key);
 
-            // Display popup message (success alert)
-            function showSaveAlert(message) {
-                saveAlert.textContent = message; // Update the alert content
-                saveAlert.style.display = "block"; // Show the alert
-                setTimeout(() => {
-                    saveAlert.style.display = "none"; // Automatically hide after 3 seconds
-                }, 1000);
-            }
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.id = service.key;
+                    checkbox.name = "services";
+                    checkbox.value = service.key;
+                    checkbox.checked = isChecked;
+                    checkbox.classList.add("form-check-input");
 
-            // Function to filter agency list dynamically based on search input
-            searchInput.addEventListener("input", function () {
-                const query = this.value.toLowerCase().trim(); // Convert search to lowercase
-                agencyItems.forEach(item => {
-                    const agencyName = item.textContent.toLowerCase().trim(); // Convert agency name to lowercase
-                    if (agencyName.includes(query)) {
-                        item.style.display = ""; // Show matching agency
-                    } else {
-                        item.style.display = "none"; // Hide non-matching agency
-                    }
+                    const label = document.createElement("label");
+                    label.htmlFor = service.key;
+                    label.textContent = service.name;
+                    label.classList.add("form-check-label");
+
+                    const formCheckDiv = document.createElement("div");
+                    formCheckDiv.classList.add("form-check");
+                    formCheckDiv.appendChild(checkbox);
+                    formCheckDiv.appendChild(label);
+
+                    servicesProvidedElem.appendChild(formCheckDiv);
                 });
-            });
+            }
 
-            // Fetch agency details and update the form
+            // Function to load agency details
             function loadAgencyDetails(agencyId) {
-                agencyDetailForm.style.display = "none"; // Hide form during fetch/loading
-
-                fetch(`/api/agency/${agencyId}/`, {
-                    method: "GET",
-                    headers: {
-                        "X-CSRFToken": csrfToken, // Include CSRF token
-                    },
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Failed to fetch details for Agency ID ${agencyId}: ${response.statusText}`);
-                        }
-                        return response.json(); // Parse JSON data
-                    })
+                fetch(`/api/agency/${agencyId}/`, { method: "GET" })
+                    .then(response => response.json())
                     .then(data => {
-                        // Populate agency details
                         agencyNameElem.textContent = data.agency_name || "No Name Provided";
                         lastUpdatedElem.textContent = data.last_updated || "Never Updated";
                         acceptingReferralsDropdown.value = data.accepting_referrals ? "yes" : "no";
+                        referralLimitInput.value = data.accepting_referrals ? (data.referral_limit || 0) : 0;
+                        referralLimitInput.readOnly = !data.is_owner;
 
-                        // Populate editable "Number of Referrals"
-                        referralLimitInput.value = data.referral_limit || 0; // Fallback to 0
-                        referralLimitInput.readOnly = !data.is_owner; // Enable editing only if user is the owner
+                        populateServices(data.available_services, data.services_provided || []);
 
-                        // Populate Services Provided
-                        servicesProvidedElem.innerHTML = ""; // Clear previous services
-                        const services = data.services_provided || []; // Fallback to empty array if undefined
-                        if (services.length > 0) {
-                            services.forEach(service => {
-                                const li = document.createElement("li");
-                                li.textContent = service;
-                                servicesProvidedElem.appendChild(li);
-                            });
-                        } else {
-                            const li = document.createElement("li");
-                            li.textContent = "No services provided.";
-                            servicesProvidedElem.appendChild(li);
-                        }
-
-                        // Toggle visibility of the save button based on ownership
                         saveButton.style.display = data.is_owner ? "block" : "none";
-
-                        // Apply styles to dropdown
-                        styleDropdown(acceptingReferralsDropdown.value);
-
-                        // Save the agency ID in the form (data attribute)
                         agencyDetailForm.setAttribute("data-agency-id", agencyId);
-
-                        // Show the form
                         agencyDetailForm.style.display = "block";
                     })
                     .catch(error => {
-                        console.error("Error fetching agency details:", error);
-                        alert("You might not have permission to access this agency or there is some issue.");
+                        console.error("Error loading agency details:", error);
+                        alert("Could not load agency details. Please try again.");
                     });
             }
 
-            // Add click event listeners for each agency item
+            // Handle changes to the "Accepting Referrals" dropdown
+            acceptingReferralsDropdown.addEventListener("change", function () {
+                const acceptingReferrals = acceptingReferralsDropdown.value === "yes";
+                if (!acceptingReferrals) {
+                    referralLimitInput.value = 0; // Set to zero if not accepting referrals
+                    referralLimitInput.readOnly = true;
+                } else {
+                    referralLimitInput.readOnly = false;
+                }
+            });
+
+            // Handle clicking on agency items
             agencyItems.forEach(item => {
                 item.addEventListener("click", function () {
                     const agencyId = this.dataset.agencyId;
-                    resetDropdown(); // Reset any previous styles
-                    loadAgencyDetails(agencyId); // Fetch and load new agency details
+                    loadAgencyDetails(agencyId);
                 });
             });
 
-            // Handle Save button click
+            // Handle save button click
             saveButton.addEventListener("click", function () {
-                const agencyId = agencyDetailForm.getAttribute("data-agency-id"); // Retrieve agency ID from the form
-
-                if (!agencyId) {
-                    console.error("Agency ID is undefined.");
-                    alert("Please select an agency first.");
-                    return;
-                }
-
-                const newStatus = acceptingReferralsDropdown.value === "yes"; // Convert value to boolean
-                const newReferralLimit = parseInt(referralLimitInput.value) || 0; // Get new referral limit
+                const agencyId = agencyDetailForm.getAttribute("data-agency-id");
+                const referralLimit = parseInt(referralLimitInput.value) || 0;
+                const acceptingReferrals = acceptingReferralsDropdown.value === "yes";
+                const selectedServices = Array.from(
+                    document.querySelectorAll("#services-provided input:checked")
+                ).map(input => input.value);
 
                 fetch(`/api/agency/${agencyId}/`, {
                     method: "POST",
                     body: JSON.stringify({
-                        accepting_referrals: newStatus,
-                        referral_limit: newReferralLimit
+                        referral_limit: referralLimit,
+                        accepting_referrals: acceptingReferrals,
+                        services_provided: selectedServices,
                     }),
                     headers: {
                         "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken, // Include CSRF token for CSRF protection
+                        "X-CSRFToken": csrfToken,
                     },
                 })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Failed to save updates for Agency ID ${agencyId}`);
-                        }
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Display success message
-                            showSaveAlert("Changes saved successfully!");
-                            // Update last updated timestamp dynamically
-                            lastUpdatedElem.textContent = data.last_updated || "Just Updated";
+                            alert("Changes saved successfully!");
                         } else {
-                            alert("Failed to save changes. Please try again.");
+                            alert("An error occurred while saving. Please try again.");
                         }
                     })
-                    .catch(error => {
-                        console.error("Error saving changes:", error);
-                        alert("Failed to update. Please try again later.");
-                    });
+                    .catch(error => console.error("Error saving changes:", error));
             });
         });
     </script>
