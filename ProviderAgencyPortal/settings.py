@@ -103,7 +103,8 @@ LOGGING = {
 }
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+USE_TZ = True  # Ensure timezones are enabled
+TIME_ZONE = 'America/Los_Angeles'  # Pacific Standard Time (with daylight saving)
 
 USE_I18N = True
 USE_TZ = True
