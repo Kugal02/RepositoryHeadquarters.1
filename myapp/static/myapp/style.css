@@ -209,3 +209,4 @@ body {
     opacity: 0;
     transition: opacity 0.5s ease-in-out, display 0s linear 0.5s; /* Delay hiding until fade-out */
 }
+
