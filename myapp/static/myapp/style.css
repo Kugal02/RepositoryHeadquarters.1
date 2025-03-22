@@ -1,8 +1,8 @@
 /* General Body Styling */
 body {
-    background: url('../myapp/background1.jpg') no-repeat center center fixed; /* Matches the existing HTML background */
+    background: url('../myapp/Logo1.png') no-repeat center center fixed; /* Matches the existing HTML background */
     background-size: cover;
-    height: 100vh;
+    height: 25vh;
     margin: 0;
     font-family: 'Arial', sans-serif;
 }
@@ -208,5 +208,29 @@ body {
 .alert.hide {
     opacity: 0;
     transition: opacity 0.5s ease-in-out, display 0s linear 0.5s; /* Delay hiding until fade-out */
+}
+
+/* Floating Logo in Upper-Right Corner */
+.form-container {
+    position: relative; /* Ensure positioning context */
+}
+
+#agency-details {
+    position: relative; /* Make it the positioning context */
+}
+
+.corner-logo-inside {
+    position: absolute;
+    top: 3vh;
+    right: 3vh;
+    width: 3in;
+    height: 3in;
+    z-index: 10;
+}
+
+.corner-logo-inside img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
