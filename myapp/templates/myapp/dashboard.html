@@ -138,174 +138,186 @@
 
 <!-- JavaScript -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const agencyItems = document.querySelectorAll(".agency-item");
-        const searchInput = document.getElementById("search-agencies");
-        const filterDropdown = document.getElementById("accepting-referrals-filter");
-        const agencyNameElem = document.getElementById("agency-name");
-        const acceptingReferralsDropdown = document.getElementById("accepting-referrals");
-        const referralLimitInput = document.getElementById("referral-limit-input");
-        const servicesProvidedElem = document.getElementById("services-provided");
-        const servicesProvidedContainer = document.getElementById("services-provided-container");
-        const agencyDetailForm = document.getElementById("agency-detail-form");
-        const lastUpdatedElem = document.getElementById("last-updated");
-        const saveButton = document.getElementById("save-button");
-        const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+document.addEventListener("DOMContentLoaded", function () {
+    const agencyItems = document.querySelectorAll(".agency-item");
+    const searchInput = document.getElementById("search-agencies");
+    const filterDropdown = document.getElementById("accepting-referrals-filter");
+    const agencyNameElem = document.getElementById("agency-name");
+    const acceptingReferralsDropdown = document.getElementById("accepting-referrals");
+    const referralLimitInput = document.getElementById("referral-limit-input");
+    const servicesProvidedElem = document.getElementById("services-provided");
+    const servicesProvidedContainer = document.getElementById("services-provided-container");
+    const agencyDetailForm = document.getElementById("agency-detail-form");
+    const lastUpdatedElem = document.getElementById("last-updated");
+    const saveButton = document.getElementById("save-button");
+    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
-        const phoneInput = document.getElementById("phone-number-input");
-        const emailInput = document.getElementById("email-address-input");
-        const phoneText = document.getElementById("agency-phone-number-text");
-        const emailText = document.getElementById("agency-email-address-text");
+    const phoneInput = document.getElementById("phone-number-input");
+    const emailInput = document.getElementById("email-address-input");
+    const phoneText = document.getElementById("agency-phone-number-text");
+    const emailText = document.getElementById("agency-email-address-text");
 
-      // Format phone numbers like 971-600-0004
-function formatPhone(phone) {
-    if (!phone) return "";
-    const cleaned = ('' + phone).replace(/\D/g, ''); // strip non-numeric
-    if (cleaned.length === 10) {
-        return cleaned.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    // ✅ Format phone number as 971-600-0004
+    function formatPhone(phone) {
+        if (!phone) return "";
+        const cleaned = ('' + phone).replace(/\D/g, '');
+        if (cleaned.length === 10) {
+            return cleaned.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+        }
+        return phone;
     }
-    return phone;
-}
 
-        filterDropdown.addEventListener("change", function () {
-            const filterValue = this.value;
-            agencyItems.forEach((agency) => {
-                const acceptingReferrals = agency.dataset.acceptingReferrals;
-                agency.style.display = (!filterValue || acceptingReferrals === filterValue) ? "" : "none";
-            });
+    // ✅ Combined search + dropdown filter
+    function filterAgencyList() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedFilter = filterDropdown.value;
+
+        agencyItems.forEach((agency) => {
+            const name = agency.textContent.toLowerCase();
+            const acceptingReferrals = (agency.dataset.acceptingReferrals || "").toLowerCase();
+
+            const matchesSearch = name.includes(searchTerm);
+            const matchesFilter = !selectedFilter || acceptingReferrals === selectedFilter;
+
+            agency.style.display = matchesSearch && matchesFilter ? "" : "none";
         });
+    }
 
-        acceptingReferralsDropdown.addEventListener("change", function () {
-            const acceptingReferrals = this.value === "yes";
-            const checkboxes = servicesProvidedElem.querySelectorAll("input[type='checkbox']");
-            servicesProvidedContainer.style.display = acceptingReferrals ? "block" : "none";
-            checkboxes.forEach((cb) => {
-                cb.disabled = !acceptingReferrals;
-                if (!acceptingReferrals) cb.checked = false;
-            });
+    // Bind filters
+    searchInput.addEventListener("input", filterAgencyList);
+    filterDropdown.addEventListener("change", filterAgencyList);
+
+    // Show/hide services based on referral toggle
+    acceptingReferralsDropdown.addEventListener("change", function () {
+        const acceptingReferrals = this.value === "yes";
+        const checkboxes = servicesProvidedElem.querySelectorAll("input[type='checkbox']");
+        servicesProvidedContainer.style.display = acceptingReferrals ? "block" : "none";
+        checkboxes.forEach((cb) => {
+            cb.disabled = !acceptingReferrals;
+            if (!acceptingReferrals) cb.checked = false;
         });
-
-        function loadAgencyDetails(agencyId) {
-            fetch(`/api/agency/${agencyId}/`, {method: "GET"})
-                .then((response) => response.json())
-                .then((data) => {
-                    agencyNameElem.textContent = data.agency_name || "No Name Provided";
-                    lastUpdatedElem.textContent = data.last_updated || "Never Updated";
-                    acceptingReferralsDropdown.value = data.accepting_referrals ? "yes" : "no";
-                    referralLimitInput.value = data.accepting_referrals ? data.referral_limit || 0 : 0;
-                    referralLimitInput.readOnly = !data.is_owner;
-
-// Reset display and values first
-                    phoneInput.style.display = "none";
-                    emailInput.style.display = "none";
-                    phoneText.style.display = "none";
-                    emailText.style.display = "none";
-                    phoneInput.value = "";
-                    emailInput.value = "";
-                    phoneText.textContent = "";
-                    emailText.textContent = "";
-
-                    if (data.is_owner) {
-                        phoneInput.value = data.phone_number || "";
-                        emailInput.value = data.email || "";
-                        phoneInput.style.display = "block";
-                        emailInput.style.display = "block";
-                    } else {
-                        phoneText.textContent = formatPhone(data.phone_number) || "N/A";
-                        emailText.textContent = data.email || "N/A";
-                        phoneText.style.display = "inline";
-                        emailText.style.display = "inline";
-                    }
-
-
-                    populateServices(data.available_services, data.services_provided || []);
-
-                    servicesProvidedContainer.style.display = data.accepting_referrals ? "block" : "none";
-                    const checkboxes = servicesProvidedElem.querySelectorAll("input[type='checkbox']");
-                    checkboxes.forEach((checkbox) => {
-                        checkbox.disabled = !data.accepting_referrals;
-                        if (!data.accepting_referrals) checkbox.checked = false;
-                    });
-
-                    saveButton.style.display = data.is_owner ? "block" : "none";
-                    agencyDetailForm.dataset.agencyId = agencyId;
-                    agencyDetailForm.style.display = "block";
-                })
-                .catch((error) => console.error("Error loading agency details:", error));
-        }
-
-        agencyItems.forEach((item) => {
-            item.addEventListener("click", function () {
-                loadAgencyDetails(this.dataset.agencyId);
-            });
-        });
-
-        saveButton.addEventListener("click", function () {
-            const agencyId = agencyDetailForm.dataset.agencyId;
-            const acceptingReferrals = acceptingReferralsDropdown.value === "yes";
-            const referralLimit = parseInt(referralLimitInput.value) || 0;
-            const selectedServices = Array.from(
-                servicesProvidedElem.querySelectorAll("input[type='checkbox']:checked")
-            ).map((checkbox) => checkbox.value);
-
-            const payload = {
-                accepting_referrals: acceptingReferrals,
-                referral_limit: acceptingReferrals ? referralLimit : 0,
-                services_provided: selectedServices,
-                phone_number: phoneInput.value,
-                email: emailInput.value
-            };
-
-            fetch(`/api/agency/${agencyId}/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrfToken,
-                },
-                body: JSON.stringify(payload),
-            })
-                .then((response) => {
-                    if (response.ok) return response.json();
-                    throw new Error("Failed to save changes");
-                })
-                .then((data) => {
-                    alert("Changes saved successfully!");
-                    lastUpdatedElem.textContent = data.last_updated || "Just now";
-                    const agencyListItem = document.querySelector(
-                        `.agency-item[data-agency-id="${agencyId}"]`
-                    );
-                    if (agencyListItem) {
-                        agencyListItem.setAttribute(
-                            "data-accepting-referrals",
-                            acceptingReferrals ? "yes" : "no"
-                        );
-                    }
-                })
-                .catch((error) => alert("An error occurred while saving changes."));
-        });
-
-        function populateServices(services, providedServices) {
-            servicesProvidedElem.innerHTML = "";
-            services.forEach((service) => {
-                const checkbox = document.createElement("input");
-                checkbox.type = "checkbox";
-                checkbox.value = service.key;
-                checkbox.checked = providedServices.includes(service.key);
-                checkbox.classList.add("form-check-input");
-
-                const label = document.createElement("label");
-                label.textContent = service.name;
-                label.classList.add("form-check-label");
-
-                const formCheckDiv = document.createElement("div");
-                formCheckDiv.classList.add("form-check");
-                formCheckDiv.appendChild(checkbox);
-                formCheckDiv.appendChild(label);
-
-                servicesProvidedElem.appendChild(formCheckDiv);
-            });
-        }
     });
+
+    function loadAgencyDetails(agencyId) {
+        fetch(`/api/agency/${agencyId}/`, { method: "GET" })
+            .then((response) => response.json())
+            .then((data) => {
+                agencyNameElem.textContent = data.agency_name || "No Name Provided";
+                lastUpdatedElem.textContent = data.last_updated || "Never Updated";
+                acceptingReferralsDropdown.value = data.accepting_referrals ? "yes" : "no";
+                referralLimitInput.value = data.accepting_referrals ? data.referral_limit || 0 : 0;
+                referralLimitInput.readOnly = !data.is_owner;
+
+                // Reset phone/email visibility
+                phoneInput.style.display = "none";
+                emailInput.style.display = "none";
+                phoneText.style.display = "none";
+                emailText.style.display = "none";
+                phoneInput.value = "";
+                emailInput.value = "";
+                phoneText.textContent = "";
+                emailText.textContent = "";
+
+                if (data.is_owner) {
+                    phoneInput.value = data.phone_number || "";
+                    emailInput.value = data.email || "";
+                    phoneInput.style.display = "block";
+                    emailInput.style.display = "block";
+                } else {
+                    phoneText.textContent = formatPhone(data.phone_number) || "N/A";
+                    emailText.textContent = data.email || "N/A";
+                    phoneText.style.display = "inline";
+                    emailText.style.display = "inline";
+                }
+
+                populateServices(data.available_services, data.services_provided || []);
+                servicesProvidedContainer.style.display = data.accepting_referrals ? "block" : "none";
+                const checkboxes = servicesProvidedElem.querySelectorAll("input[type='checkbox']");
+                checkboxes.forEach((checkbox) => {
+                    checkbox.disabled = !data.accepting_referrals;
+                    if (!data.accepting_referrals) checkbox.checked = false;
+                });
+
+                saveButton.style.display = data.is_owner ? "block" : "none";
+                agencyDetailForm.dataset.agencyId = agencyId;
+                agencyDetailForm.style.display = "block";
+            })
+            .catch((error) => console.error("Error loading agency details:", error));
+    }
+
+    agencyItems.forEach((item) => {
+        item.addEventListener("click", function () {
+            loadAgencyDetails(this.dataset.agencyId);
+        });
+    });
+
+    saveButton.addEventListener("click", function () {
+        const agencyId = agencyDetailForm.dataset.agencyId;
+        const acceptingReferrals = acceptingReferralsDropdown.value === "yes";
+        const referralLimit = parseInt(referralLimitInput.value) || 0;
+        const selectedServices = Array.from(
+            servicesProvidedElem.querySelectorAll("input[type='checkbox']:checked")
+        ).map((checkbox) => checkbox.value);
+
+        const payload = {
+            accepting_referrals: acceptingReferrals,
+            referral_limit: acceptingReferrals ? referralLimit : 0,
+            services_provided: selectedServices,
+            phone_number: phoneInput.value,
+            email: emailInput.value
+        };
+
+        fetch(`/api/agency/${agencyId}/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken,
+            },
+            body: JSON.stringify(payload),
+        })
+            .then((response) => {
+                if (response.ok) return response.json();
+                throw new Error("Failed to save changes");
+            })
+            .then((data) => {
+                alert("Changes saved successfully!");
+                lastUpdatedElem.textContent = data.last_updated || "Just now";
+                const agencyListItem = document.querySelector(
+                    `.agency-item[data-agency-id="${agencyId}"]`
+                );
+                if (agencyListItem) {
+                    agencyListItem.setAttribute(
+                        "data-accepting-referrals",
+                        acceptingReferrals ? "yes" : "no"
+                    );
+                }
+            })
+            .catch((error) => alert("An error occurred while saving changes."));
+    });
+
+    function populateServices(services, providedServices) {
+        servicesProvidedElem.innerHTML = "";
+        services.forEach((service) => {
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.value = service.key;
+            checkbox.checked = providedServices.includes(service.key);
+            checkbox.classList.add("form-check-input");
+
+            const label = document.createElement("label");
+            label.textContent = service.name;
+            label.classList.add("form-check-label");
+
+            const formCheckDiv = document.createElement("div");
+            formCheckDiv.classList.add("form-check");
+            formCheckDiv.appendChild(checkbox);
+            formCheckDiv.appendChild(label);
+
+            servicesProvidedElem.appendChild(formCheckDiv);
+        });
+    }
+});
 </script>
+
 </body>
 </html>
