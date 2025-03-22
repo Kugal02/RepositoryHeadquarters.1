@@ -42,6 +42,8 @@ class Service(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['name']  # Alphabetical order based on the 'name' field
 
 class AgencyDetail(models.Model):
     """

@@ -12,8 +12,7 @@
 
     <style>
         body {
-            background: url('{% static 'myapp/background1.jpg' %}') no-repeat center center fixed;
-            background-size: cover;
+            background: none;
             height: 100vh;
         }
 
@@ -31,7 +30,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 1050;
-            display: none; /* Initially hidden */
+            display: none;
             text-align: center;
             padding: 15px 25px;
             border-radius: 8px;
@@ -40,193 +39,273 @@
     </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <!-- Header Section -->
-        <div class="row bg-primary text-white p-3">
-            <div class="col-md-10">
-                <h2>Provider Agency Dashboard - Marion County</h2>
-            </div>
-            <div class="col-md-2 text-end">
-                <a href="{% url 'logout' %}" class="btn bg-light">Logout</a>
-            </div>
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row bg-primary text-white p-3">
+        <div class="col-md-10">
+            <h2>Provider Agency Dashboard (Marion County)</h2>
         </div>
-
-        <!-- Main Content -->
-        <div class="row">
-            <!-- Left Section: List of Agencies -->
-            <div class="col-md-3 border-end p-3" id="agency-list">
-                <h4 class="text-center">Agency List</h4>
-                <input type="text" id="search-agencies" class="form-control mb-3" placeholder="Search Agencies">
-                <select id="accepting-referrals-filter" class="form-control mb-3">
-                    <option value="">All Agencies</option>
-                    <option value="yes">Accepting Referrals</option>
-                    <option value="no">Not Accepting Referrals</option>
-                </select>
-                <ul class="list-group" id="agency-list-items">
-                    {% for agency in agencies %}
-                        <li class="list-group-item agency-item text-center" data-agency-id="{{ agency.id }}">
-                            {{ agency.agency_name }}
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item text-center">No agencies found.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <!-- Right Section: Agency Details -->
-            <div class="col-md-9 p-3" id="agency-details">
-                <h4>Agency Details</h4>
-                <p>Select an agency to view or update details.</p>
-
-                <!-- Form to display details -->
-                <form id="agency-detail-form" style="display: none;" data-agency-id="">
-                    {% csrf_token %}
-                    <h4 id="agency-name" class="mt-3"></h4>
-                    <p><strong>Last Updated:</strong> <span id="last-updated"></span></p>
-                    <div id="accepting-referrals-container" class="my-3">
-                        <label for="accepting-referrals"><strong>Accepting Referrals:</strong></label>
-                        <select id="accepting-referrals" class="form-select ms-2" style="width: 150px;">
-                            <option value="">Select</option>
-                            <option value="yes">Yes</option>
-                            <option value="no">No</option>
-                        </select>
-                    </div>
-                    <!-- Editable Number of Referrals -->
-                    <div class="my-3">
-                        <label for="referral-limit-input"><strong>Number of Referrals Accepting:</strong></label>
-                        <input type="number" id="referral-limit-input" class="form-control ms-2" style="width: 150px;" min="0" readonly>
-                    </div>
-                    <!-- Display Services Provided -->
-                    <div class="my-3">
-                        <strong>Services Provided:</strong>
-                        <div id="services-provided" class="form-check ms-2">
-                            <!-- Dynamically populated checkboxes via JavaScript -->
-                        </div>
-                    </div>
-                    <button type="button" id="save-button" class="btn btn-primary mt-3">Save Changes</button>
-                </form>
-            </div>
+        <div class="col-md-2 text-end">
+            <a href="{% url 'logout' %}" class="btn bg-light">Logout</a>
         </div>
     </div>
 
-    <!-- JavaScript -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const agencyItems = document.querySelectorAll(".agency-item");
-            const agencyNameElem = document.getElementById("agency-name");
-            const acceptingReferralsDropdown = document.getElementById("accepting-referrals");
-            const referralLimitInput = document.getElementById("referral-limit-input");
-            const servicesProvidedElem = document.getElementById("services-provided");
-            const agencyDetailForm = document.getElementById("agency-detail-form");
-            const lastUpdatedElem = document.getElementById("last-updated");
-            const saveButton = document.getElementById("save-button");
-            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Left Section: List of Agencies -->
+        <div class="col-md-3 border-end p-3" id="agency-list">
+            <h4 class="text-center">Agency List</h4>
+            <input type="text" id="search-agencies" class="form-control mb-3" placeholder="Search Agencies">
+            <select id="accepting-referrals-filter" class="form-control mb-3">
+                <option value="">All Agencies</option>
+                <option value="yes">Accepting Referrals</option>
+                <option value="no">Not Accepting Referrals</option>
+            </select>
+            <ul class="list-group" id="agency-list-items">
+                {% for agency in agencies %}
+                    <li class="list-group-item agency-item text-center"
+                        data-agency-id="{{ agency.id }}"
+                        data-accepting-referrals="{{ agency.accepting_referrals|yesno:'yes,no' }}">
+                        {{ agency.agency_name }}
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-center">No agencies found.</li>
+                {% endfor %}
+            </ul>
+        </div>
 
-            console.log("Dashboard loaded. Initializing event listeners.");
+        <!-- Right Section: Agency Details -->
+        <div class="col-md-9 p-3" id="agency-details">
+            <h4>Agency Details</h4>
+            <p>Select an agency to view or update details.</p>
 
-            // Function to populate services dynamically
-            function populateServices(services, providedServices) {
-                servicesProvidedElem.innerHTML = ""; // Clear previously added services
+            <!-- Form to display details -->
+            <form id="agency-detail-form"
+                  style="display: none; background: url('{% static 'myapp/background1.jpg' %}') no-repeat center center; background-size: cover; padding: 20px; border-radius: 10px;"
+                  data-agency-id="">
+                {% csrf_token %}
+                <h4 id="agency-name" class="mt-3" style="color: darkgreen; font-weight: bold"></h4>
 
-                services.forEach(service => {
-                    const isChecked = providedServices.includes(service.key);
+                <!-- Phone & Email Section -->
+                <p style="color: darkgreen; font-weight: bold;">
+                    <!-- Phone + Email Section -->
+                <div class="d-flex align-items-center gap-2" style="color: darkgreen; font-weight: bold;">
+                    <div class="mb-2">
+                        <strong>Phone Number:</strong>
+                        <span id="agency-phone-number-text" style="display: none; font-weight: normal;"></span>
+                        <input type="text" id="phone-number-input" class="form-control mt-1"
+                               style="display: none;" placeholder="Enter phone number">
+                    </div>
 
-                    const checkbox = document.createElement("input");
-                    checkbox.type = "checkbox";
-                    checkbox.id = service.key;
-                    checkbox.name = "services";
-                    checkbox.value = service.key;
-                    checkbox.checked = isChecked;
-                    checkbox.classList.add("form-check-input");
+                    <div class="mb-2">
+                        <strong>Email Address:</strong>
+                        <span id="agency-email-address-text" style="display: none; font-weight: normal;"></span>
+                        <input type="email" id="email-address-input" class="form-control mt-1"
+                               style="display: none;" placeholder="Enter email address">
+                    </div>
 
-                    const label = document.createElement("label");
-                    label.htmlFor = service.key;
-                    label.textContent = service.name;
-                    label.classList.add("form-check-label");
 
-                    const formCheckDiv = document.createElement("div");
-                    formCheckDiv.classList.add("form-check");
-                    formCheckDiv.appendChild(checkbox);
-                    formCheckDiv.appendChild(label);
+                </div>
+                </p>
 
-                    servicesProvidedElem.appendChild(formCheckDiv);
-                });
-            }
+                <p><strong>Last Updated:</strong> <span id="last-updated"></span></p>
 
-            // Function to load agency details
-            function loadAgencyDetails(agencyId) {
-                fetch(`/api/agency/${agencyId}/`, { method: "GET" })
-                    .then(response => response.json())
-                    .then(data => {
-                        agencyNameElem.textContent = data.agency_name || "No Name Provided";
-                        lastUpdatedElem.textContent = data.last_updated || "Never Updated";
-                        acceptingReferralsDropdown.value = data.accepting_referrals ? "yes" : "no";
-                        referralLimitInput.value = data.accepting_referrals ? (data.referral_limit || 0) : 0;
-                        referralLimitInput.readOnly = !data.is_owner;
+                <div id="accepting-referrals-container" class="my-3">
+                    <label for="accepting-referrals"><strong>Accepting Referrals:</strong></label>
+                    <select id="accepting-referrals" class="form-select ms-2" style="width: 100px;">
+                        <option value="">Select</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
 
-                        populateServices(data.available_services, data.services_provided || []);
+                <div class="my-3">
+                    <label for="referral-limit-input"><strong>Number of Referrals Accepting:</strong></label>
+                    <input type="number" id="referral-limit-input" class="form-control ms-2" style="width: 100px;"
+                           min="0" readonly>
+                </div>
 
-                        saveButton.style.display = data.is_owner ? "block" : "none";
-                        agencyDetailForm.setAttribute("data-agency-id", agencyId);
-                        agencyDetailForm.style.display = "block";
-                    })
-                    .catch(error => {
-                        console.error("Error loading agency details:", error);
-                        alert("Could not load agency details. Please try again.");
-                    });
-            }
+                <div id="services-provided-container" class="my-3">
+                    <strong>We are accepting referrals for these services:</strong>
+                    <div id="services-provided" class="form-check ms-2"></div>
+                </div>
 
-            // Handle changes to the "Accepting Referrals" dropdown
-            acceptingReferralsDropdown.addEventListener("change", function () {
-                const acceptingReferrals = acceptingReferralsDropdown.value === "yes";
-                if (!acceptingReferrals) {
-                    referralLimitInput.value = 0; // Set to zero if not accepting referrals
-                    referralLimitInput.readOnly = true;
-                } else {
-                    referralLimitInput.readOnly = false;
-                }
-            });
+                <button type="button" id="save-button" class="btn btn-primary mt-3">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
 
-            // Handle clicking on agency items
-            agencyItems.forEach(item => {
-                item.addEventListener("click", function () {
-                    const agencyId = this.dataset.agencyId;
-                    loadAgencyDetails(agencyId);
-                });
-            });
+<!-- JavaScript -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const agencyItems = document.querySelectorAll(".agency-item");
+        const searchInput = document.getElementById("search-agencies");
+        const filterDropdown = document.getElementById("accepting-referrals-filter");
+        const agencyNameElem = document.getElementById("agency-name");
+        const acceptingReferralsDropdown = document.getElementById("accepting-referrals");
+        const referralLimitInput = document.getElementById("referral-limit-input");
+        const servicesProvidedElem = document.getElementById("services-provided");
+        const servicesProvidedContainer = document.getElementById("services-provided-container");
+        const agencyDetailForm = document.getElementById("agency-detail-form");
+        const lastUpdatedElem = document.getElementById("last-updated");
+        const saveButton = document.getElementById("save-button");
+        const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
-            // Handle save button click
-            saveButton.addEventListener("click", function () {
-                const agencyId = agencyDetailForm.getAttribute("data-agency-id");
-                const referralLimit = parseInt(referralLimitInput.value) || 0;
-                const acceptingReferrals = acceptingReferralsDropdown.value === "yes";
-                const selectedServices = Array.from(
-                    document.querySelectorAll("#services-provided input:checked")
-                ).map(input => input.value);
+        const phoneInput = document.getElementById("phone-number-input");
+        const emailInput = document.getElementById("email-address-input");
+        const phoneText = document.getElementById("agency-phone-number-text");
+        const emailText = document.getElementById("agency-email-address-text");
 
-                fetch(`/api/agency/${agencyId}/`, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        referral_limit: referralLimit,
-                        accepting_referrals: acceptingReferrals,
-                        services_provided: selectedServices,
-                    }),
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken,
-                    },
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert("Changes saved successfully!");
-                        } else {
-                            alert("An error occurred while saving. Please try again.");
-                        }
-                    })
-                    .catch(error => console.error("Error saving changes:", error));
+      // Format phone numbers like 971-600-0004
+function formatPhone(phone) {
+    if (!phone) return "";
+    const cleaned = ('' + phone).replace(/\D/g, ''); // strip non-numeric
+    if (cleaned.length === 10) {
+        return cleaned.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    }
+    return phone;
+}
+
+        filterDropdown.addEventListener("change", function () {
+            const filterValue = this.value;
+            agencyItems.forEach((agency) => {
+                const acceptingReferrals = agency.dataset.acceptingReferrals;
+                agency.style.display = (!filterValue || acceptingReferrals === filterValue) ? "" : "none";
             });
         });
-    </script>
+
+        acceptingReferralsDropdown.addEventListener("change", function () {
+            const acceptingReferrals = this.value === "yes";
+            const checkboxes = servicesProvidedElem.querySelectorAll("input[type='checkbox']");
+            servicesProvidedContainer.style.display = acceptingReferrals ? "block" : "none";
+            checkboxes.forEach((cb) => {
+                cb.disabled = !acceptingReferrals;
+                if (!acceptingReferrals) cb.checked = false;
+            });
+        });
+
+        function loadAgencyDetails(agencyId) {
+            fetch(`/api/agency/${agencyId}/`, {method: "GET"})
+                .then((response) => response.json())
+                .then((data) => {
+                    agencyNameElem.textContent = data.agency_name || "No Name Provided";
+                    lastUpdatedElem.textContent = data.last_updated || "Never Updated";
+                    acceptingReferralsDropdown.value = data.accepting_referrals ? "yes" : "no";
+                    referralLimitInput.value = data.accepting_referrals ? data.referral_limit || 0 : 0;
+                    referralLimitInput.readOnly = !data.is_owner;
+
+// Reset display and values first
+                    phoneInput.style.display = "none";
+                    emailInput.style.display = "none";
+                    phoneText.style.display = "none";
+                    emailText.style.display = "none";
+                    phoneInput.value = "";
+                    emailInput.value = "";
+                    phoneText.textContent = "";
+                    emailText.textContent = "";
+
+                    if (data.is_owner) {
+                        phoneInput.value = data.phone_number || "";
+                        emailInput.value = data.email || "";
+                        phoneInput.style.display = "block";
+                        emailInput.style.display = "block";
+                    } else {
+                        phoneText.textContent = formatPhone(data.phone_number) || "N/A";
+                        emailText.textContent = data.email || "N/A";
+                        phoneText.style.display = "inline";
+                        emailText.style.display = "inline";
+                    }
+
+
+                    populateServices(data.available_services, data.services_provided || []);
+
+                    servicesProvidedContainer.style.display = data.accepting_referrals ? "block" : "none";
+                    const checkboxes = servicesProvidedElem.querySelectorAll("input[type='checkbox']");
+                    checkboxes.forEach((checkbox) => {
+                        checkbox.disabled = !data.accepting_referrals;
+                        if (!data.accepting_referrals) checkbox.checked = false;
+                    });
+
+                    saveButton.style.display = data.is_owner ? "block" : "none";
+                    agencyDetailForm.dataset.agencyId = agencyId;
+                    agencyDetailForm.style.display = "block";
+                })
+                .catch((error) => console.error("Error loading agency details:", error));
+        }
+
+        agencyItems.forEach((item) => {
+            item.addEventListener("click", function () {
+                loadAgencyDetails(this.dataset.agencyId);
+            });
+        });
+
+        saveButton.addEventListener("click", function () {
+            const agencyId = agencyDetailForm.dataset.agencyId;
+            const acceptingReferrals = acceptingReferralsDropdown.value === "yes";
+            const referralLimit = parseInt(referralLimitInput.value) || 0;
+            const selectedServices = Array.from(
+                servicesProvidedElem.querySelectorAll("input[type='checkbox']:checked")
+            ).map((checkbox) => checkbox.value);
+
+            const payload = {
+                accepting_referrals: acceptingReferrals,
+                referral_limit: acceptingReferrals ? referralLimit : 0,
+                services_provided: selectedServices,
+                phone_number: phoneInput.value,
+                email: emailInput.value
+            };
+
+            fetch(`/api/agency/${agencyId}/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken,
+                },
+                body: JSON.stringify(payload),
+            })
+                .then((response) => {
+                    if (response.ok) return response.json();
+                    throw new Error("Failed to save changes");
+                })
+                .then((data) => {
+                    alert("Changes saved successfully!");
+                    lastUpdatedElem.textContent = data.last_updated || "Just now";
+                    const agencyListItem = document.querySelector(
+                        `.agency-item[data-agency-id="${agencyId}"]`
+                    );
+                    if (agencyListItem) {
+                        agencyListItem.setAttribute(
+                            "data-accepting-referrals",
+                            acceptingReferrals ? "yes" : "no"
+                        );
+                    }
+                })
+                .catch((error) => alert("An error occurred while saving changes."));
+        });
+
+        function populateServices(services, providedServices) {
+            servicesProvidedElem.innerHTML = "";
+            services.forEach((service) => {
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.value = service.key;
+                checkbox.checked = providedServices.includes(service.key);
+                checkbox.classList.add("form-check-input");
+
+                const label = document.createElement("label");
+                label.textContent = service.name;
+                label.classList.add("form-check-label");
+
+                const formCheckDiv = document.createElement("div");
+                formCheckDiv.classList.add("form-check");
+                formCheckDiv.appendChild(checkbox);
+                formCheckDiv.appendChild(label);
+
+                servicesProvidedElem.appendChild(formCheckDiv);
+            });
+        }
+    });
+</script>
 </body>
 </html>

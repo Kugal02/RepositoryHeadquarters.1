@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import LoginForm, SignUpForm
 from .models import Profile, AgencyDetail, Service
+from django.db import models
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -53,16 +54,21 @@ def dashboard_view(request):
     Displays a list of agencies, filtered based on referral status if applicable.
     """
     logger.info(f"Dashboard view accessed by user: {request.user.username}.")
-    # Fetch agencies ordered alphabetically by name
-    agencies = Profile.objects.all().order_by("agency_name")
+
+    # Fetch agencies along with related agency details
+    agencies = Profile.objects.prefetch_related('user__agency_details').order_by("agency_name")
 
     # Filter agencies based on "accepting referrals" status if provided
     accepting_referrals = request.GET.get('accepting_referrals', '').lower()
+
+    # Annotate the Profile queryset with the `accepting_referrals` field from the related AgencyDetail
+    agencies = agencies.annotate(accepting_referrals=models.F('user__agency_details__accepting_referrals'))
+
     if accepting_referrals == 'yes':
-        agencies = agencies.filter(agency_details__accepting_referrals=True)
+        agencies = agencies.filter(accepting_referrals=True)
         logger.info("Filtered agencies accepting referrals.")
     elif accepting_referrals == 'no':
-        agencies = agencies.filter(agency_details__accepting_referrals=False)
+        agencies = agencies.filter(accepting_referrals=False)
         logger.info("Filtered agencies NOT accepting referrals.")
 
     return render(request, 'myapp/dashboard.html', {'agencies': agencies})
@@ -73,36 +79,81 @@ def dashboard_view(request):
 def agency_details(request, agency_id):
     """
     API View to fetch or update the agency details.
+    Includes phone number, email, referrals, services, and last updated info.
     """
+    logger.info(f"Agency details access by user {request.user.username} for agency ID {agency_id}.")
+
+    # Fetch agency and its details
     agency = get_object_or_404(Profile, id=agency_id)
     agency_detail, created = AgencyDetail.objects.get_or_create(agency=agency.user)
 
     if request.method == "GET":
+        # Fetch all services for the dropdown
         all_services = Service.objects.all()
+
+        # Prepare response data
         data = {
-            "agency_name": agency.agency_name,
+            "agency_name": agency.agency_name or "N/A",  # Fallback to "N/A" if no name is provided
+            "phone_number": agency.phone_number or "N/A",  # Fallback to "N/A"
+            "email": agency.user.email or "N/A",  # Fallback to "N/A"
             "accepting_referrals": agency_detail.accepting_referrals,
             "referral_limit": agency_detail.referral_limit,
             "services_provided": [service.key for service in agency_detail.services_provided.all()],
             "available_services": [{"key": s.key, "name": s.name} for s in all_services],
-            "last_updated": agency_detail.last_updated.strftime("%m/%d/%Y"),
-            "is_owner": (request.user == agency.user),
+            "last_updated": agency_detail.last_updated.strftime(
+                "%m/%d/%Y") if agency_detail.last_updated else "Never Updated",
+            "is_owner": request.user == agency.user,  # Determine if the user owns the agency
         }
+        logger.info(f"Returning GET response for agency ID {agency_id}.")
         return JsonResponse(data)
 
     elif request.method == "POST":
+        # Ensure only the owner of the agency can update its details
         if request.user != agency.user:
+            logger.error(f"Unauthorized update attempt for agency ID {agency_id} by user {request.user.username}.")
             return JsonResponse({"error": "You are not authorized to make changes."}, status=403)
 
-        payload = json.loads(request.body)
-        agency_detail.accepting_referrals = payload.get("accepting_referrals", False)
-        agency_detail.referral_limit = payload.get("referral_limit", 0) if agency_detail.accepting_referrals else 0
-        agency_detail.services_provided.set(Service.objects.filter(key__in=payload.get("services_provided", [])))
-        agency_detail.save()
-        return JsonResponse({"success": True, "last_updated": agency_detail.last_updated.strftime("%m/%d/%Y")})
+        # Parse the JSON payload
+        try:
+            payload = json.loads(request.body)
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON payload received.")
+            return JsonResponse({"error": "Invalid JSON payload."}, status=400)
 
+        # Update phone number and email if provided
+        phone_number = payload.get("phone_number")
+        email = payload.get("email")
+        if phone_number is not None:
+            agency.phone_number = phone_number
+        if email is not None:
+            agency.user.email = email
+            agency.user.save()  # Save changes to the User model
+
+        # Update AgencyDetail fields
+        accepting_referrals = payload.get("accepting_referrals")
+        referral_limit = payload.get("referral_limit")
+        services_provided = payload.get("services_provided", [])
+
+        if accepting_referrals is not None:
+            agency_detail.accepting_referrals = accepting_referrals
+        if referral_limit is not None:
+            agency_detail.referral_limit = int(referral_limit) if accepting_referrals else 0
+        agency_detail.services_provided.set(Service.objects.filter(key__in=services_provided))
+
+        # Save changes
+        try:
+            agency.save()
+            agency_detail.save()
+            logger.info(f"Agency details updated successfully for agency ID {agency_id}.")
+        except Exception as e:
+            logger.error(f"Error saving updates for agency ID {agency_id}: {str(e)}")
+            return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+
+        return JsonResponse({"success": True, "message": "Agency details updated successfully.",
+                             "last_updated": agency_detail.last_updated.strftime("%m/%d/%Y")})
+
+    logger.warning("Invalid request method used for agency details API.")
     return JsonResponse({"error": "Invalid request method."}, status=405)
-
 
 
 # Sign-Up View
