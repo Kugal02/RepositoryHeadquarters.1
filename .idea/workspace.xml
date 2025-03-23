@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a03bdcdb-4732-4935-94a9-396556dd2de7" name="Changes" comment="Launch v1.1 3-23-2025 1:48pm" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Kugal02&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Kugal02/RepositoryHeadquarters.1.git&quot;,
+    &quot;accountId&quot;: &quot;4503b5ba-793a-4467-9e64-c047768e4d6f&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="QODANA_PROBLEMS_VIEW_TAB" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="2uCf0S6nMoBivZxJuYMM15SI1Hn" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Django tests.Test: .executor&quot;: &quot;Run&quot;,
+    &quot;Notification.DisplayName-DoNotAsk-Qodana&quot;: &quot;Qodana&quot;,
+    &quot;Notification.DoNotAsk-Qodana&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="QodanaCIConfigService">
+    <option name="ciType" value="GITHUB" />
+    <option name="path" value="$PROJECT_DIR$/.github/workflows/qodana_code_quality.yml" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\James\PycharmProjects\DjangoProject\myapp" />
+      <recent name="C:\Users\James\PycharmProjects\DjangoProject" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Django tests.Test: ">
+    <configuration name="Test: " type="DjangoTestsConfigurationType" temporary="true">
+      <module name="DjangoProject" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="TARGET" value="" />
+      <option name="SETTINGS_FILE" value="" />
+      <option name="CUSTOM_SETTINGS" value="false" />
+      <option name="USE_OPTIONS" value="false" />
+      <option name="OPTIONS" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="DjangoProject" type="Python.DjangoServer" factoryName="Django server">
+      <module name="DjangoProject" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="port" value="8000" />
+      <option name="host" value="" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Django tests.Test: " />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-PY-243.26053.29" />
+        <option value="bundled-python-sdk-b1dbf8ef85a6-4df51de95216-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.26053.29" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a03bdcdb-4732-4935-94a9-396556dd2de7" name="Changes" comment="" />
+      <created>1741757255282</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1741757255282</updated>
+      <workItem from="1741757256218" duration="445000" />
+      <workItem from="1741839413939" duration="3309000" />
+      <workItem from="1741850068765" duration="3963000" />
+      <workItem from="1741889139117" duration="3185000" />
+      <workItem from="1741892510691" duration="2597000" />
+      <workItem from="1741895144359" duration="12233000" />
+      <workItem from="1741911380727" duration="4083000" />
+      <workItem from="1741925758805" duration="2646000" />
+      <workItem from="1741928439506" duration="4290000" />
+      <workItem from="1741968906900" duration="23359000" />
+      <workItem from="1742004355416" duration="2884000" />
+      <workItem from="1742012801098" duration="4593000" />
+      <workItem from="1742024806764" duration="4670000" />
+      <workItem from="1742060980984" duration="4723000" />
+      <workItem from="1742081070323" duration="5951000" />
+      <workItem from="1742098979158" duration="7453000" />
+      <workItem from="1742116142019" duration="4813000" />
+      <workItem from="1742146744809" duration="11055000" />
+      <workItem from="1742158817549" duration="3169000" />
+      <workItem from="1742162031049" duration="1073000" />
+      <workItem from="1742163125287" duration="4996000" />
+      <workItem from="1742168280003" duration="920000" />
+      <workItem from="1742182210127" duration="6415000" />
+      <workItem from="1742188706545" duration="5549000" />
+      <workItem from="1742217043162" duration="1174000" />
+      <workItem from="1742218239225" duration="4219000" />
+      <workItem from="1742238274160" duration="3523000" />
+      <workItem from="1742256234392" duration="11958000" />
+      <workItem from="1742281079373" duration="3180000" />
+      <workItem from="1742345702117" duration="9531000" />
+      <workItem from="1742413220289" duration="11142000" />
+      <workItem from="1742432932222" duration="9213000" />
+      <workItem from="1742448893466" duration="84000" />
+      <workItem from="1742449034930" duration="46000" />
+      <workItem from="1742487080733" duration="18834000" />
+      <workItem from="1742531267553" duration="4465000" />
+      <workItem from="1742589689651" duration="11369000" />
+      <workItem from="1742605369980" duration="10018000" />
+      <workItem from="1742753776511" duration="2793000" />
+      <workItem from="1742763891307" duration="1149000" />
+    </task>
+    <task id="LOCAL-00001" summary="Agency Details without services showing when yes changed">
+      <option name="closed" value="true" />
+      <created>1742160368990</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1742160368990</updated>
+    </task>
+    <task id="LOCAL-00002" summary="dashboard without save working">
+      <option name="closed" value="true" />
+      <created>1742168974153</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1742168974153</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Dashboard with agency details showing 3-19-2025 936pm">
+      <option name="closed" value="true" />
+      <created>1742445408614</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1742445408614</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Dashboard with agency details showing 3-19-2025 936pm">
+      <option name="closed" value="true" />
+      <created>1742445904120</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1742445904120</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Dashboard with agency details showing 3-19-2025 936pm">
+      <option name="closed" value="true" />
+      <created>1742495908158</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1742495908160</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Dashboard with agency details showing 3-19-2025 936pm">
+      <option name="closed" value="true" />
+      <created>1742496059431</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1742496059431</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Dashboard 3-20-2025 1140am">
+      <option name="closed" value="true" />
+      <created>1742496090625</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1742496090625</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Dashboard 3-20-2025 1140am">
+      <option name="closed" value="true" />
+      <created>1742496630680</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1742496630680</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Dashboard with services showing 3-20-2025 410pm">
+      <option name="closed" value="true" />
+      <created>1742512163390</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1742512163390</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Most functions fixed 3-21-2025 6:48pm">
+      <option name="closed" value="true" />
+      <created>1742608148608</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1742608148608</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Most functions fixed 3-21-2025 6:56pm">
+      <option name="closed" value="true" />
+      <created>1742608593060</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1742608593060</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Most functions fixed 3-21-2025 10:31pm">
+      <option name="closed" value="true" />
+      <created>1742621490201</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1742621490201</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Most functions fixed 3-21-2025 11:11pm">
+      <option name="closed" value="true" />
+      <created>1742623891055</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1742623891055</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Launch v1.1 3-23-2025 1:48pm">
+      <option name="closed" value="true" />
+      <created>1742762991442</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1742762991442</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Agency Details without services showing when yes changed" />
+    <MESSAGE value="dashboard without save working" />
+    <MESSAGE value="Dashboard 3-20-2025 11:40am" />
+    <MESSAGE value="Dashboard with agency details showing 3-19-2025 936pm" />
+    <MESSAGE value="Dashboard 3-20-2025 1140am" />
+    <MESSAGE value="Dashboard with services showing 3-20-2025 410pm" />
+    <MESSAGE value="Dashboard with services showing 3-20-2025 430pm" />
+    <MESSAGE value="Saving current progress" />
+    <MESSAGE value="Most functions fixed 3-21-2025 6:48pm" />
+    <MESSAGE value="Most functions fixed 3-21-2025 6:56pm" />
+    <MESSAGE value="Most functions fixed 3-21-2025 10:31pm" />
+    <MESSAGE value="Most functions fixed 3-21-2025 11:11pm" />
+    <MESSAGE value="Launch v1.1 3-23-2025 1:48pm" />
+    <option name="LAST_COMMIT_MESSAGE" value="Launch v1.1 3-23-2025 1:48pm" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/DjangoProject$Test__.coverage" NAME="Test:  Coverage Results" MODIFIED="1742157621187" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+  </component>
+</project>
