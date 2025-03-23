@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a03bdcdb-4732-4935-94a9-396556dd2de7" name="Changes" comment="Launch v1.1 3-23-2025 1:48pm" />
+    <list default="true" id="a03bdcdb-4732-4935-94a9-396556dd2de7" name="Changes" comment="Launch v1.1 3-23-2025 1:48pm">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -74,7 +76,7 @@
       <recent name="C:\Users\James\PycharmProjects\DjangoProject" />
     </key>
   </component>
-  <component name="RunManager" selected="Django tests.Test: ">
+  <component name="RunManager" selected="Django Server.DjangoProject">
     <configuration name="Test: " type="DjangoTestsConfigurationType" temporary="true">
       <module name="DjangoProject" />
       <option name="ENV_FILES" value="" />
@@ -181,7 +183,8 @@
       <workItem from="1742589689651" duration="11369000" />
       <workItem from="1742605369980" duration="10018000" />
       <workItem from="1742753776511" duration="2793000" />
-      <workItem from="1742763891307" duration="1149000" />
+      <workItem from="1742763891307" duration="2333000" />
+      <workItem from="1742768686313" duration="1160000" />
     </task>
     <task id="LOCAL-00001" summary="Agency Details without services showing when yes changed">
       <option name="closed" value="true" />
