@@ -13,7 +13,7 @@ SECRET_KEY = 'django-insecure-^%0(3u=6b^4z%p##watj7l6fof=g6#af*6msmmjc6wwz%!4!-&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['3.141.164.157', 'www.m-cef.org']
+ALLOWED_HOSTS = ['provideragencyportal.com', 'www.provideragencyportal.com']
 
 
 # Application definition
@@ -109,3 +109,13 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'email-smtp.us-east-2.amazonaws.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'AKIAU44WZPM4HX7GUHQJ'
+EMAIL_HOST_PASSWORD = 'BIeMVkdTmnosFWQNmSdGdAoivxA3fv9hmjJV5S7CzRyd'
+DEFAULT_FROM_EMAIL = 'noreply@provideragencyportal.com'
+
+
