@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,8 +14,12 @@ SECRET_KEY = 'django-insecure-^%0(3u=6b^4z%p##watj7l6fof=g6#af*6msmmjc6wwz%!4!-&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['provideragencyportal.com', 'www.provideragencyportal.com']
-
+ALLOWED_HOSTS = [
+    'provideragencyportal.com',
+    'www.provideragencyportal.com',
+    '127.0.0.1',
+    'localhost',
+]
 
 # Application definition
 
@@ -42,7 +47,7 @@ ROOT_URLCONF = 'ProviderAgencyPortal.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'agency', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -105,6 +110,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATICFILES_DIRS = [
+    BASE_DIR / "agency" / "static",
+]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -117,5 +126,12 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'AKIAU44WZPM4HX7GUHQJ'
 EMAIL_HOST_PASSWORD = 'BIeMVkdTmnosFWQNmSdGdAoivxA3fv9hmjJV5S7CzRyd'
 DEFAULT_FROM_EMAIL = 'noreply@provideragencyportal.com'
+SERVER_EMAIL = 'server@provideragencyportal.com'
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'
+
+
+
 
 
