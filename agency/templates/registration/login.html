@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Provider Agency Portal</title>
+    <style>
+        body {
+            background-image: url("{% static 'images/SignLog1.png' %}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            font-family: Arial, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            max-width: 300px;
+            margin: 8% auto;
+            padding: 2em;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .logo-top-right {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .logo-top-right img {
+            width: 100px;
+            height: auto;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5em;
+        }
+
+        form input {
+            width: 100%;
+            padding: 0.6em;
+            margin-bottom: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.8em;
+            background-color: #0066cc;
+            border: none;
+            color: white;
+            font-size: 1em;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #004999;
+        }
+
+        .signup-link {
+            margin-top: 1em;
+            text-align: center;
+        }
+
+        .signup-link a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <!-- Logo -->
+    <div class="logo-top-right">
+        <img src="{% static 'images/EmpFstLogo1.png' %}" alt="Employment First Logo">
+    </div>
+
+    <!-- Form -->
+    <h2>Login</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div>
+            {{ form.username.label_tag }}
+            {{ form.username }}
+        </div>
+        <div>
+            {{ form.password.label_tag }}
+            {{ form.password }}
+        </div>
+        <button type="submit">Log In</button>
+    </form>
+
+    <div class="signup-link">
+        <p>Don’t have an account? <a href="{% url 'signup' %}">Sign up</a></p>
+        <p><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
+    </div>
+
+</div>
+
+</body>
+</html>
