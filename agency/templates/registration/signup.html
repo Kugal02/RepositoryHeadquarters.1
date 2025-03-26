@@ -18,11 +18,11 @@
 
         .signup-container {
             background-color: rgba(255, 255, 255, 0.95);
-            max-width: 600px;
-            margin: 5% auto;
+            max-width: 480px;
+            margin: 1% auto;
             padding: 2em;
             border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
         }
 
         h2 {
@@ -39,6 +39,7 @@
         }
 
         .form-check, .form-group {
+            margin-top: 1em;
             margin-bottom: 1em;
         }
 
@@ -74,74 +75,97 @@
         .login-link a:hover {
             text-decoration: underline;
         }
+
+        .logo-center {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .signup-logo {
+            width: 100px; /* adjust smaller if needed */
+            height: auto;
+        }
+
+        .tight-header {
+            margin: 0;
+            padding: 0;
+        }
+
     </style>
 </head>
 <body>
 <div class="signup-container">
-    <h2>Create an Account</h2>
+
     <form method="POST">
         {% csrf_token %}
 
         <!-- User Type (radio buttons) -->
+        <div class="signup-container">
+            <!-- Removed the top header -->
+
+            <!-- Centered logo -->
+            <div class="logo-center">
+                <img src="{% static 'images/EmpFstLogo1.png' %}" alt="Job Logo" class="signup-logo">
+            </div>
+
+            <h2 class="tight-header"><strong>Create an Account</strong></h2>
+            <h2 class="tight-header"><strong>(Provider Agency Portal)</strong></h2>
+
+
+        </div>
+
         <div class="form-group">
-            <label><strong>User type:</strong></label><br>
+            <label><strong>User Type:</strong></label><br>
             {% for radio in form.user_type %}
-                <label style="display: inline-flex; align-items: center; margin-right: 20px;">
-                    {{ radio.tag }} {{ radio.choice_label }}
-                </label>
+            <label style="display: inline-flex; align-items: center; margin-right: 20px;">
+                {{ radio.tag }} {{ radio.choice_label }}
+            </label>
             {% endfor %}
         </div>
 
         <!-- Input Fields -->
-        <div class="form-group">
-            {{ form.username.label_tag }}
-            {{ form.username }}
-        </div>
-        <div class="form-group">
-            {{ form.password.label_tag }}
-            {{ form.password }}
-        </div>
-        <div class="form-group">
-            {{ form.agency_name.label_tag }}
-            {{ form.agency_name }}
-        </div>
-        <div class="form-group">
-            {{ form.contact_first_name.label_tag }}
-            {{ form.contact_first_name }}
-        </div>
-        <div class="form-group">
-            {{ form.contact_last_name.label_tag }}
-            {{ form.contact_last_name }}
-        </div>
-        <div class="form-group">
-            {{ form.agency_phone.label_tag }}
-            {{ form.agency_phone }}
-        </div>
-        <div class="form-group">
-            {{ form.agency_email.label_tag }}
-            {{ form.agency_email }}
-        </div>
-        <div class="form-group">
-            {{ form.state.label_tag }}
-            {{ form.state }}
-        </div>
+        <!-- Input Fields -->
+        <div class="form-group">{{ form.username.label_tag }}{{ form.username }}</div>
+        <div class="form-group">{{ form.password.label_tag }}{{ form.password }}</div>
+        <div class="form-group">{{ form.confirm_password.label_tag }}{{ form.confirm_password }}</div>
+        <div class="form-group">{{ form.agency_name.label_tag }}{{ form.agency_name }}</div>
+        <div class="form-group">{{ form.contact_first_name.label_tag }}{{ form.contact_first_name }}</div>
+        <div class="form-group">{{ form.contact_last_name.label_tag }}{{ form.contact_last_name }}</div>
+        <div class="form-group">{{ form.agency_phone.label_tag }}{{ form.agency_phone }}</div>
+        <div class="form-group">{{ form.agency_email.label_tag }}{{ form.agency_email }}</div>
+        <div class="form-group">{{ form.state.label_tag }}{{ form.state }}</div>
 
-        <!-- County checkboxes in 2 columns -->
+
+        <!-- County checkboxes -->
         <div class="form-group">
-            <label><strong>Counties:</strong></label>
-            <div style="display: flex; flex-wrap: wrap;">
+            <label style="font-weight: bold; line-height: 1.2; margin-bottom: 1rem; display: block;">
+                County/Counties your agency provides services (OR)<br>
+                County/Counties SC/PA serves
+            </label>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 16px;">
                 {% for checkbox in form.counties %}
-                    <label style="width: 45%; margin-bottom: 5px;">
-                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 14px;">
+                    <label for="{{ checkbox.id_for_label }}" style="text-align: right; flex: 1;">
+                        {{ checkbox.choice_label }}
                     </label>
+                    <div style="flex: 0 0 auto;">{{ checkbox.tag }}</div>
+                </div>
                 {% endfor %}
             </div>
         </div>
 
         <!-- Agree to Terms -->
-        <div class="form-check">
-            {{ form.agree_to_terms }}
-            {{ form.agree_to_terms.label_tag }}
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-top: 1.5rem;">
+            <label for="{{ form.agree_to_terms.id_for_label }}" style="margin: 0; text-align: right; flex: 1;">
+                <strong>I agree to the</strong>
+                <a href="{% static 'documents/TermsOfService.pdf' %}" target="_blank"
+                   style="color: #0066cc; text-decoration: underline;">
+                    Terms of Service
+                </a>
+                :
+            </label>
+            <div style="flex: 0 0 auto;">{{ form.agree_to_terms }}</div>
         </div>
 
         <button type="submit">Sign Up</button>
@@ -151,5 +175,16 @@
         <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
     </div>
 </div>
+
+<script>
+    document.querySelector("form").addEventListener("submit", function (e) {
+        const checkbox = document.querySelector("input[name='agree_to_terms']");
+        if (!checkbox || !checkbox.checked) {
+            e.preventDefault();
+            alert("Please agree to the Terms of Service before signing up.");
+        }
+    });
+</script>
+
 </body>
 </html>

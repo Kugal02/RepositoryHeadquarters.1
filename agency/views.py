@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 from .forms import SignUpForm
+
 
 def signup(request):
     if request.method == 'POST':
@@ -17,5 +19,14 @@ def signup(request):
         form = SignUpForm()
     return render(request, 'registration/signup.html', {'form': form})
 
+
+@login_required  #
 def dashboard(request):
     return render(request, 'dashboard.html')
+
+
+def home_redirect(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')  # or the name of your dashboard view
+    else:
+        return redirect('login')

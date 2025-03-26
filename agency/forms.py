@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 # Oregon counties
 COUNTY_CHOICES = [
@@ -41,13 +42,17 @@ COUNTY_CHOICES = [
     ('yamhill', 'Yamhill'),
 ]
 
+
 class SignUpForm(forms.ModelForm):
     USER_TYPE_CHOICES = [
         ('provider', 'Provider Agency'),
         ('county', 'State/County Entity'),
     ]
+
     user_type = forms.ChoiceField(choices=USER_TYPE_CHOICES, widget=forms.RadioSelect)
     password = forms.CharField(widget=forms.PasswordInput)
+    confirm_password = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+
     agency_name = forms.CharField(max_length=100)
     contact_first_name = forms.CharField(max_length=50)
     contact_last_name = forms.CharField(max_length=50)
@@ -62,8 +67,11 @@ class SignUpForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['username', 'password', 'email']
+        fields = ['username', 'password', 'confirm_password', 'email']
 
-agency_phone = forms.CharField(max_length=20)
-agency_email = forms.EmailField()
-
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm = cleaned_data.get("confirm_password")
+        if password and confirm and password != confirm:
+            raise ValidationError("Passwords do not match.")
