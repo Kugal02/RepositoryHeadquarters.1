@@ -2,6 +2,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
     <meta charset="UTF-8">
     <title>Sign Up</title>
     <style>
@@ -125,7 +128,6 @@
         </div>
 
         <!-- Input Fields -->
-        <!-- Input Fields -->
         <div class="form-group">{{ form.username.label_tag }}{{ form.username }}</div>
         <div class="form-group">{{ form.password.label_tag }}{{ form.password }}</div>
         <div class="form-group">{{ form.confirm_password.label_tag }}{{ form.confirm_password }}</div>
@@ -135,6 +137,23 @@
         <div class="form-group">{{ form.agency_phone.label_tag }}{{ form.agency_phone }}</div>
         <div class="form-group">{{ form.agency_email.label_tag }}{{ form.agency_email }}</div>
         <div class="form-group">{{ form.state.label_tag }}{{ form.state }}</div>
+
+        <!-- Role selection -->
+        <div class="form-group">
+            <label for="id_role"><strong>Your Role:</strong></label>
+            <select name="role" required>
+                <option value="">Select Role</option>
+                <option value="provider">Provider Agency</option>
+                <option value="coordinator">Service Coordinator / Personal Agent</option>
+                <option value="owner">Agency Owner</option>
+            </select>
+        </div>
+
+        <!-- Primary County input -->
+        <div class="form-group">
+            <label for="id_county"><strong>Primary County:</strong></label>
+            <input type="text" name="county" required>
+        </div>
 
 
         <!-- County checkboxes -->

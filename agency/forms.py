@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from agency.models import UserProfile  # 👈 Correct placement
 
 # Oregon counties
 COUNTY_CHOICES = [
@@ -52,6 +53,9 @@ class SignUpForm(forms.ModelForm):
     user_type = forms.ChoiceField(choices=USER_TYPE_CHOICES, widget=forms.RadioSelect)
     password = forms.CharField(widget=forms.PasswordInput)
     confirm_password = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+
+    role = forms.ChoiceField(choices=UserProfile.ROLE_CHOICES)
+    county = forms.CharField(max_length=100)
 
     agency_name = forms.CharField(max_length=100)
     contact_first_name = forms.CharField(max_length=50)

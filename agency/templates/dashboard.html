@@ -3,10 +3,133 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard</title>
+    <title>Provider Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #0066cc;
+            color: white;
+            padding: 1em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dashboard-container {
+            display: flex;
+        }
+        .sidebar {
+            width: 220px;
+            background: #fff;
+            padding: 1em;
+            border-right: 1px solid #ccc;
+        }
+        .main-content {
+            flex: 1;
+            padding: 2em;
+            background-color: #fff;
+        }
+        .provider-list li {
+            margin-bottom: 10px;
+        }
+        .provider-details input,
+        .provider-details select {
+            width: 100%;
+            padding: 0.5em;
+            margin-bottom: 1em;
+        }
+        .search-box {
+            margin-top: 1em;
+            margin-bottom: 1em;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 0.5em;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to the Provider Agency Dashboard</h1>
-    <p>You are logged in as <strong>{{ request.user.username }}</strong>.</p>
+<header>
+    <div><strong>Provider Agency Portal</strong></div>
+    <div>
+        <form method="get" style="display:inline;">
+            <select name="county" onchange="this.form.submit()">
+                <option value="">Filter by County</option>
+                {% for county in distinct_counties %}
+                    <option value="{{ county }}" {% if county == request.GET.county %}selected{% endif %}>{{ county|title }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" style="margin-left: 20px; color: white; background: transparent; border: none; cursor: pointer;">Logout</button>
+        </form>
+    </div>
+</header>
+<div class="dashboard-container">
+    <div class="sidebar">
+        <form method="get">
+            <select name="referral_status" onchange="this.form.submit()">
+                <option value="">All Referral Statuses</option>
+                <option value="accepting" {% if request.GET.referral_status == 'accepting' %}selected{% endif %}>Accepting</option>
+                <option value="not_accepting" {% if request.GET.referral_status == 'not_accepting' %}selected{% endif %}>Not Accepting</option>
+            </select>
+        </form>
+        <div class="search-box">
+            <input type="text" placeholder="Search Providers...">
+        </div>
+        <ul class="provider-list">
+            {% for provider in all_providers %}
+                <li><a href="?provider_id={{ provider.id }}">{{ provider.agency_name }}</a></li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'state_county_entities' %}">View State/County Entities</a>
+    </div>
+    <div class="main-content">
+        {% if selected_provider %}
+            <img src="{% static 'images/EmpFstLogo1.png' %}" alt="Logo" style="max-height: 60px; float:right">
+            <h2>{{ selected_provider.agency_name }}</h2>
+            <p><strong>Phone:</strong> {{ selected_provider.agency_phone }} &nbsp; <strong>Email:</strong> {{ selected_provider.agency_email }}</p>
+            <p><strong>Referral Status:</strong> {{ selected_provider.get_referral_status_display }}</p>
+            <p><strong>Last Updated:</strong> {{ selected_provider.updated_at|default:'N/A' }}</p>
+            {% if is_owner %}
+            <form method="POST">
+                {% csrf_token %}
+                <select name="referral_status" id="referral_status">
+                    <option value="accepting" {% if profile.referral_status == 'accepting' %}selected{% endif %}>Accepting Referrals</option>
+                    <option value="not_accepting" {% if profile.referral_status == 'not_accepting' %}selected{% endif %}>Not Accepting Referrals</option>
+                </select>
+
+                <div id="referral-fields" {% if profile.referral_status != 'accepting' %}style="display:none"{% endif %}>
+                    <label>Residential Referrals:</label>
+                    <input type="number" name="residential_referrals" value="{{ profile.residential_referrals }}">
+                    <label>Adult Foster Care:</label>
+                    <input type="number" name="afc_referrals" value="{{ profile.afc_referrals }}">
+                    <label>Behavior Services:</label>
+                    <input type="number" name="behavior_referrals" value="{{ profile.behavior_referrals }}">
+                    <label>DSA Facility:</label>
+                    <input type="number" name="dsa_facility_referrals" value="{{ profile.dsa_facility_referrals }}">
+                </div>
+                <button type="submit">Save Changes</button>
+            </form>
+            {% endif %}
+        {% else %}
+            <p>Please select a provider to view their details.</p>
+        {% endif %}
+    </div>
+</div>
+<script>
+    const referralStatus = document.getElementById('referral_status');
+    const fields = document.getElementById('referral-fields');
+    if (referralStatus) {
+        referralStatus.addEventListener('change', () => {
+            fields.style.display = referralStatus.value === 'accepting' ? 'block' : 'none';
+        });
+    }
+</script>
 </body>
 </html>

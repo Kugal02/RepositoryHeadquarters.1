@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>State/County Entities</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #0066cc;
+            color: white;
+            padding: 1em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            max-height: 50px;
+        }
+        .container {
+            max-width: 960px;
+            margin: 20px auto;
+            background: white;
+            padding: 2em;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-top: 0;
+        }
+        .filter-form, .export-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1em;
+        }
+        .filter-form input, .filter-form select {
+            padding: 0.5em;
+            margin-right: 10px;
+        }
+        .export-links a {
+            margin-left: 10px;
+            padding: 0.5em 1em;
+            background-color: #0066cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .county-group {
+            margin-bottom: 2em;
+        }
+        .back-button {
+            text-decoration: none;
+            background-color: #ccc;
+            padding: 6px 12px;
+            border-radius: 4px;
+        }
+        .pagination {
+            margin-top: 2em;
+            text-align: center;
+        }
+        .pagination span, .pagination a {
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div><strong>State/County Entities</strong></div>
+    <img src="{% static 'images/EmpFstLogo1.png' %}" alt="Logo" class="logo">
+</header>
+<div class="container">
+    <div class="filter-form">
+        <form method="get">
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search...">
+            <select name="county" onchange="this.form.submit()">
+                <option value="">All Counties</option>
+                {% for county in distinct_counties %}
+                    <option value="{{ county }}" {% if county == selected_county %}selected{% endif %}>{{ county|title }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Filter</button>
+        </form>
+        <div class="export-links">
+            <a href="{% url 'export_csv' %}?q={{ search_query }}&county={{ selected_county }}">Export CSV</a>
+            <a href="{% url 'export_pdf' %}?q={{ search_query }}&county={{ selected_county }}">Export PDF</a>
+            <a href="{% url 'dashboard' %}" class="back-button">Back to Dashboard</a>
+        </div>
+    </div>
+
+    {% for county, providers in grouped_providers %}
+        <div class="county-group">
+            <h3>{{ county|title }}</h3>
+            <ul>
+                {% for provider in providers %}
+                    <li>{{ provider.agency_name }} - {{ provider.agency_phone }} - {{ provider.agency_email }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&county={{ selected_county }}">Previous</a>
+        {% endif %}
+
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&county={{ selected_county }}">Next</a>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.querySelector("input[name='q']");
+        const providerGroups = document.querySelectorAll(".county-group");
+
+        searchInput.addEventListener("input", function () {
+            const search = this.value.toLowerCase();
+
+            providerGroups.forEach(group => {
+                const items = group.querySelectorAll("li");
+                let matchFound = false;
+
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    const matches = text.includes(search);
+                    item.style.display = matches ? "block" : "none";
+                    if (matches) matchFound = true;
+                });
+
+                group.style.display = matchFound ? "block" : "none";
+            });
+        });
+    });
+</script>
+</body>
+</html>

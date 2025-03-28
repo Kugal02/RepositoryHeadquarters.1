@@ -1,19 +1,20 @@
 from django.urls import path
-from . import views
 from django.contrib.auth import views as auth_views
-from django.contrib import admin
+from .views import signup, dashboard, home_redirect, CustomPasswordResetView, state_county_entities
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', views.home_redirect, name='home'),  # 👈 this should be first
-    path('dashboard/', views.dashboard, name='dashboard'),
-    path('signup/', views.signup, name='signup'),
+    path('', home_redirect, name='home'),
+    path('dashboard/', dashboard, name='dashboard'),
+    path('signup/', signup, name='signup'),
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
-    path('admin/', admin.site.urls),
+    path('state-county-entities/', state_county_entities, name='state_county_entities'),
+    path('state-county-entities/export/csv/', views.export_csv, name='export_csv'),
+    path('state-county-entities/export/pdf/', views.export_pdf, name='export_pdf'),
 
-    # Optional: Add forgot/reset password views
-    path('password-reset/', auth_views.PasswordResetView.as_view(template_name='registration/password_reset.html'),
-         name='password_reset'),
+    path('password-reset/', CustomPasswordResetView.as_view(), name='password_reset'),
     path('password-reset/done/',
          auth_views.PasswordResetDoneView.as_view(template_name='registration/password_reset_done.html'),
          name='password_reset_done'),
@@ -24,3 +25,5 @@ urlpatterns = [
          auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'),
          name='password_reset_complete'),
 ]
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
