@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load form_extras %}
+
+{% block content %}
+<div class="container my-4">
+    <h2>Edit Your Profile</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="id_contact_first_name" class="form-label">Contact first name:</label>
+                {{ form.contact_first_name|add_class:"form-control" }}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="id_contact_last_name" class="form-label">Contact last name:</label>
+                {{ form.contact_last_name|add_class:"form-control" }}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="id_contact_phone_number" class="form-label">Phone number:</label>
+                {{ form.contact_phone_number|add_class:"form-control" }}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="id_contact_email" class="form-label">Email:</label>
+                {{ form.contact_email|add_class:"form-control" }}
+            </div>
+            <div class="col-12 mb-3">
+                <label for="id_contact_address" class="form-label">Address:</label>
+                {{ form.contact_address|add_class:"form-control" }}
+            </div>
+
+            <div class="col-12 mb-3">
+                <label for="id_contact_address" class="form-label">Address:</label>
+                {{ form.contact_address|add_class:"form-control" }}
+            </div>
+
+            <!-- Add Website input -->
+            <div class="col-12 mb-3">
+                <label for="id_website" class="form-label fw-bold">Website:</label>
+                {{ form.website|add_class:"form-control" }}
+            </div>
+
+
+        </div>
+
+        <div class="col-12 mb-3">
+            <label for="id_profile_image" class="form-label fw-bold">Upload a Logo or Photo: (optional)</label>
+            {{ form.profile_image }}
+        </div>
+
+
+        <div class="mb-3">
+            <label for="id_notes" class="form-label"><strong>Notes:</strong></label>
+            {{ form.notes }}
+            <small class="form-text text-muted">Max 300 characters.</small>
+        </div>
+
+        <!-- Referral Status -->
+        <div class="mb-4">
+            {{ form.referral_status.label_tag }} {{ form.referral_status }}
+        </div>
+
+        <!-- Services Section -->
+        <div id="services_section">
+            <h4 class="mt-4 mb-3"># of referrals you can accept for each service:</h4>
+            <div class="row">
+                {% for field in form.visible_fields %}
+                {% if "_referrals" in field.name and not field.name|slice:"-6:" == "_count" %}
+                <div class="col-md-6 d-flex align-items-center mb-3 service-group">
+                    <div class="form-check me-3">
+                        {{ field }} {{ field.label_tag }}
+                    </div>
+                    <div class="referral-count" id="{{ field.name }}_count_container">
+                        {% with count_field=field.name|add:'_count' %}
+                        {{ form|get_form_field:count_field }}
+                        {% endwith %}
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+
+        <!-- Error Messages -->
+        {% if form.errors %}
+        <div class="alert alert-danger mt-3">
+            <ul class="mb-0">
+                {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                <li><strong>{{ field|capfirst }}:</strong> {{ error }}</li>
+                {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Optional Styling -->
+<style>
+    .form-check-input {
+        margin-top: 0.3rem;
+    }
+
+    .referral-count input[type="number"] {
+        width: 60px;
+        text-align: center;
+    }
+
+    .form-check-label {
+        margin-left: 0.25rem;
+    }
+</style>
+
+<!-- Script: Toggle count fields -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const referralSelect = document.getElementById("id_referral_status");
+        const servicesSection = document.getElementById("services_section");
+
+        function updateServiceVisibility() {
+            const isAccepting = referralSelect.value === "accepting";
+            servicesSection.style.display = isAccepting ? "block" : "none";
+
+            if (!isAccepting) return;
+
+            document.querySelectorAll(".service-group").forEach(group => {
+                const checkbox = group.querySelector("input[type='checkbox']");
+                const countContainer = group.querySelector(".referral-count");
+
+                countContainer.style.display = checkbox.checked ? "block" : "none";
+
+                checkbox.addEventListener("change", function () {
+                    countContainer.style.display = checkbox.checked ? "block" : "none";
+                });
+            });
+        }
+
+        referralSelect.addEventListener("change", updateServiceVisibility);
+        updateServiceVisibility();  // Init on load
+    });
+</script>
+{% endblock %}

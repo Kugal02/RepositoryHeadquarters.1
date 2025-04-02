@@ -3,133 +3,255 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Provider Dashboard</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ProviderAgencyPortal</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: white;
         }
-        header {
-            background-color: #0066cc;
-            color: white;
-            padding: 1em;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .dashboard-container {
-            display: flex;
-        }
+
         .sidebar {
-            width: 220px;
-            background: #fff;
+            background-color: #fff;
             padding: 1em;
             border-right: 1px solid #ccc;
         }
+
         .main-content {
-            flex: 1;
-            padding: 2em;
             background-color: #fff;
+            padding: 2em;
         }
-        .provider-list li {
-            margin-bottom: 10px;
+
+        .dashboard-container {
+            display: flex;
+            flex-wrap: wrap;
         }
-        .provider-details input,
-        .provider-details select {
-            width: 100%;
-            padding: 0.5em;
-            margin-bottom: 1em;
-        }
-        .search-box {
-            margin-top: 1em;
-            margin-bottom: 1em;
-        }
-        .search-box input {
-            width: 100%;
-            padding: 0.5em;
+
+        @media (max-width: 768px) {
+            .dashboard-container .col-lg-2 {
+                flex: 1 0 25%;
+            }
+            .dashboard-container .col-lg-7,
+            .dashboard-container .col-lg-3 {
+                flex: 1 0 75%;
+            }
         }
     </style>
 </head>
 <body>
-<header>
-    <div><strong>Provider Agency Portal</strong></div>
-    <div>
-        <form method="get" style="display:inline;">
-            <select name="county" onchange="this.form.submit()">
-                <option value="">Filter by County</option>
-                {% for county in distinct_counties %}
-                    <option value="{{ county }}" {% if county == request.GET.county %}selected{% endif %}>{{ county|title }}</option>
-                {% endfor %}
-            </select>
-        </form>
-        <form method="POST" action="{% url 'logout' %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" style="margin-left: 20px; color: white; background: transparent; border: none; cursor: pointer;">Logout</button>
-        </form>
+
+<header class="bg-primary text-white p-3">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <!-- Left Column -->
+            <div class="col-md-6 d-flex align-items-center gap-3 mb-3 mb-md-0">
+                <strong class="fs-3">ProviderAgencyPortal.com</strong>
+
+            </div>
+
+            <!-- Right Column -->
+            {% if request.user.is_authenticated %}
+            <div class="col-md-6 d-flex justify-content-md-end align-items-center gap-1">
+                <span class="fw-bold">{{ request.user.username }}</span>
+                <form method="POST" action="{% url 'logout' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-light btn-sm">Logout</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
     </div>
 </header>
-<div class="dashboard-container">
-    <div class="sidebar">
-        <form method="get">
-            <select name="referral_status" onchange="this.form.submit()">
-                <option value="">All Referral Statuses</option>
-                <option value="accepting" {% if request.GET.referral_status == 'accepting' %}selected{% endif %}>Accepting</option>
-                <option value="not_accepting" {% if request.GET.referral_status == 'not_accepting' %}selected{% endif %}>Not Accepting</option>
-            </select>
-        </form>
-        <div class="search-box">
-            <input type="text" placeholder="Search Providers...">
-        </div>
-        <ul class="provider-list">
-            {% for provider in all_providers %}
-                <li><a href="?provider_id={{ provider.id }}">{{ provider.agency_name }}</a></li>
-            {% endfor %}
-        </ul>
-        <a href="{% url 'state_county_entities' %}">View State/County Entities</a>
-    </div>
-    <div class="main-content">
-        {% if selected_provider %}
-            <img src="{% static 'images/EmpFstLogo1.png' %}" alt="Logo" style="max-height: 60px; float:right">
-            <h2>{{ selected_provider.agency_name }}</h2>
-            <p><strong>Phone:</strong> {{ selected_provider.agency_phone }} &nbsp; <strong>Email:</strong> {{ selected_provider.agency_email }}</p>
-            <p><strong>Referral Status:</strong> {{ selected_provider.get_referral_status_display }}</p>
-            <p><strong>Last Updated:</strong> {{ selected_provider.updated_at|default:'N/A' }}</p>
-            {% if is_owner %}
-            <form method="POST">
-                {% csrf_token %}
-                <select name="referral_status" id="referral_status">
-                    <option value="accepting" {% if profile.referral_status == 'accepting' %}selected{% endif %}>Accepting Referrals</option>
-                    <option value="not_accepting" {% if profile.referral_status == 'not_accepting' %}selected{% endif %}>Not Accepting Referrals</option>
-                </select>
 
-                <div id="referral-fields" {% if profile.referral_status != 'accepting' %}style="display:none"{% endif %}>
-                    <label>Residential Referrals:</label>
-                    <input type="number" name="residential_referrals" value="{{ profile.residential_referrals }}">
-                    <label>Adult Foster Care:</label>
-                    <input type="number" name="afc_referrals" value="{{ profile.afc_referrals }}">
-                    <label>Behavior Services:</label>
-                    <input type="number" name="behavior_referrals" value="{{ profile.behavior_referrals }}">
-                    <label>DSA Facility:</label>
-                    <input type="number" name="dsa_facility_referrals" value="{{ profile.dsa_facility_referrals }}">
+
+<div class="container-fluid dashboard-container">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Left Sidebar -->
+            <div class="col-lg-2 col-md-3 col-sm-12 sidebar">
+                <h5>Provider Agencies</h5>
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="providerSearch" placeholder="Search Providers..." onkeyup="searchProviders()">
                 </div>
-                <button type="submit">Save Changes</button>
-            </form>
-            {% endif %}
-        {% else %}
-            <p>Please select a provider to view their details.</p>
+                <div class="referral-status mb-3">
+                    <p><strong>Referral Status:</strong></p>
+                    <select id="referral_status_select" class="form-select form-select-sm" onchange="updateReferralStatus()">
+                        <option value="accepting" {% if profile.referral_status == 'accepting' %}selected{% endif %}>Accepting</option>
+                        <option value="not_accepting" {% if profile.referral_status == 'not_accepting' %}selected{% endif %}>Not Accepting</option>
+                    </select>
+                </div>
+
+                <!-- Filter by County -->
+<div class="mb-3">
+    <label for="county-filter" class="form-label fw-bold">Filter by:</label>
+    <form method="get">
+        <select name="county" id="county-filter" onchange="this.form.submit()" class="form-select form-select-sm">
+            <option value="">All Counties</option>
+            {% for county in distinct_counties %}
+                <option value="{{ county.id }}" {% if county.id == selected_county %}selected{% endif %}>
+                    {{ county.name|title }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+                <ul id="providerList" class="list-group">
+                    {% for provider in all_providers %}
+                    <li class="list-group-item">
+                        <a href="?provider_id={{ provider.id }}">
+                            {{ provider.user.username }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                </div>
+
+            <!-- Middle Column -->
+            <div class="col-lg-7 col-md-6 col-sm-12 main-content">
+                {% if selected_provider %}
+                    <h3>{{ selected_provider.user.username }}</h3>
+                    {% if last_login_display %}
+                        <p class="mb-3"
+                        style="color: {% if last_login_status == 'old' %}red{% else %}green{% endif %}; font-size: 0.9rem;">
+                    Last login: {{ last_login_display }}
+                    </p>
+                {% endif %}
+
+        {% if selected_provider.user.id == request.user.id %}
+            <div class="mb-3">
+                <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm">Edit My Info</a>
+            </div>
         {% endif %}
+
+        <div class="contact-info" style="line-height: .5; margin-bottom: 1rem;">
+            <p><strong>Contact Name:</strong> {{ selected_provider.contact_first_name }} {{ selected_provider.contact_last_name }}</p>
+            <p><strong>Phone:</strong> {{ selected_provider.contact_phone_number }}</p>
+            <p><strong>Email:</strong> {{ selected_provider.contact_email }}</p>
+            <p><strong>Address:</strong> {{ selected_provider.contact_address }}</p>
+            {% if selected_provider.website %}
+            <p>
+                <strong>Website:</strong>
+                <a href="{{ selected_provider.website }}" target="_blank" rel="noopener noreferrer">
+                    {{ selected_provider.website }}
+                </a>
+            </p>
+            {% endif %}
+        </div>
+                {% if selected_provider.notes %}
+                <div class="mt-3">
+                    <h5>Additional Notes:</h5>
+                    <p style="white-space: pre-wrap;">{{ selected_provider.notes }}</p>
+                </div>
+                {% endif %}
+                <div>
+                    <p><strong>Referral Status:</strong> {{ selected_provider.referral_status|title }}</p>
+                    <ul>
+                        {% if selected_provider.residential_referrals %}<li>Residential Services — Accepting up to {{ selected_provider.residential_referrals_count }}</li>{% endif %}
+                        {% if selected_provider.afc_referrals %}<li>Adult Foster Care — Accepting up to {{ selected_provider.afc_referrals_count }}</li>{% endif %}
+                        {% if selected_provider.behavior_referrals %}<li>Behavior Services — Accepting up to {{ selected_provider.behavior_referrals_count }}</li>{% endif %}
+                        {% if selected_provider.dsa_facility_referrals %}<li>DSA Facility Services — Accepting up to {{ selected_provider.dsa_facility_referrals_count }}</li>{% endif %}
+                        {% if selected_provider.dsa_community_referrals %}<li>DSA Community Services — Accepting up to {{ selected_provider.dsa_community_referrals_count }}</li>{% endif %}
+                        {% if selected_provider.dsa_community_solo_referrals %}<li>DSA Community Solo Services — Accepting up to {{ selected_provider.dsa_community_solo_referrals_count }}</li>{% endif %}
+                        {% if selected_provider.vocational_rehabilitation_referrals %}<li>Vocational Rehabilitation — Accepting up to {{ selected_provider.vocational_rehabilitation_referrals_count }}</li>{% endif %}
+                        {% if selected_provider.career_exploration_referrals %}<li>Career Exploration — Accepting up to {{ selected_provider.career_exploration_referrals_count }}</li>{% endif %}
+                        {% if selected_provider.job_development_referrals %}<li>Job Development — Accepting up to {{ selected_provider.job_development_referrals_count }}</li>{% endif %}
+                        {% if selected_provider.job_coaching_referrals %}<li>Job Coaching — Accepting up to {{ selected_provider.job_coaching_referrals_count }}</li>{% endif %}
+                        {% if selected_provider.job_search_assistance_referrals %}<li>Job Search Assistance — Accepting up to {{ selected_provider.job_search_assistance_referrals_count }}</li>{% endif %}
+                        {% if selected_provider.employment_path_community_referrals %}<li>Employment Path Community — Accepting up to {{ selected_provider.employment_path_community_referrals_count }}</li>{% endif %}
+                        {% if selected_provider.employment_path_community_solo_referrals %}<li>Employment Path Community Solo — Accepting up to {{ selected_provider.employment_path_community_solo_referrals_count }}</li>{% endif %}
+                        {% if selected_provider.adl_iadl_referrals %}<li>ADL/IADL Services — Accepting up to {{ selected_provider.adl_iadl_referrals_count }}</li>{% endif %}
+                    </ul>
+                </div>
+                {% else %}
+                <p>Select a provider from the left panel to view their details.</p>
+                {% endif %}
+            </div>
+
+            <!-- Right Column for Photo -->
+            <div class="col-lg-3 col-md-3 col-sm-12" style="margin-top: 20px;">
+                {% if selected_provider.profile_image %}
+                <div class="card">
+                    <img src="{{ selected_provider.profile_image.url }}" class="card-img-top img-fluid rounded" style="max-width: 100%; max-height: 300px; object-fit: cover;" alt="Profile Image">
+                </div>
+                {% else %}
+                <p class="text-muted">No image uploaded</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
-<script>
-    const referralStatus = document.getElementById('referral_status');
-    const fields = document.getElementById('referral-fields');
-    if (referralStatus) {
-        referralStatus.addEventListener('change', () => {
-            fields.style.display = referralStatus.value === 'accepting' ? 'block' : 'none';
+
+    <!-- END: Dashboard Main Layout -->
+
+
+    <script>
+    function updateReferralStatus() {
+        const referralStatus = document.getElementById("referral_status_select").value;
+
+        fetch("{% url 'update_referral_status' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({ 'referral_status': referralStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById("referrals_section").style.display =
+                    referralStatus === 'accepting' ? 'block' : 'none';
+                document.getElementById("not_accepting_section").style.display =
+                    referralStatus === 'not_accepting' ? 'block' : 'none';
+            }
         });
     }
 </script>
+
+<script>
+    function searchProviders() {
+        const searchInput = document.getElementById('providerSearch').value.toLowerCase();
+        const providerList = document.getElementById('providerList');
+        const providers = providerList.getElementsByTagName('li');
+
+        Array.from(providers).forEach(function (provider) {
+            const providerName = provider.textContent.toLowerCase();
+            provider.style.display = providerName.includes(searchInput) ? "" : "none";
+        });
+    }
+
+    document.querySelectorAll('.referral-field').forEach(function (inputField) {
+        inputField.addEventListener('change', function () {
+            const referralType = this.name;
+            const newValue = this.value;
+
+            fetch("{% url 'update_referral' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    'referral_type': referralType,
+                    'new_value': newValue
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Referral updated successfully');
+                } else {
+                    console.log('Error:', data.error);
+                }
+            });
+        });
+    });
+</script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
