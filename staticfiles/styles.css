@@ -9,7 +9,7 @@
 
     <style>
         body {
-            background-image: url("{% static 'images/SignLogV2.png' %}");
+            background-image: url("{% static "agency/images/SignLogV2.png" %}");
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
@@ -129,7 +129,7 @@
 <body>
     <div class="login-container">
         <div class="logo-top-right">
-            <img src="{% static 'images/EmpFstLogo1.png' %}" alt="Employment First Logo" />
+            <img src="{% static 'agency/images/EmpFstLogo1.png' %}">
         </div>
 
         <h4>ProviderAgencyPortal.com</h4>

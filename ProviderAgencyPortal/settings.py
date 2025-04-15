@@ -2,28 +2,15 @@ from pathlib import Path
 import os
 import environ
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Initialize environment variables
 env = environ.Env()
-env.read_env(str(BASE_DIR / '.env'))  # Read the .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# Retrieve SECRET_KEY from .env file
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env("SECRET_KEY")
+DEBUG = env.bool("DEBUG", default=False)
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
-# Debugging to print the SECRET_KEY and DEBUG after they have been loaded
-print("SECRET_KEY:", SECRET_KEY)
-print("DEBUG:", env('DEBUG', default=True))
-
-# ALLOWED_HOSTS - Define which host/domain the site can be accessed from.
-ALLOWED_HOSTS = [
-    'provideragencyportal.com',
-    'www.provideragencyportal.com',
-    '127.0.0.1',
-    'localhost',
-    '3.141.164.157',
-]
 
 # Application definition
 INSTALLED_APPS = [
@@ -116,9 +103,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MAILGUN_API_KEY = env('MAILGUN_API_KEY')
 MAILGUN_DOMAIN = env('MAILGUN_DOMAIN')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
-
-# Other settings
-DEBUG = env.bool('DEBUG', default=True)
 
 LOGIN_REDIRECT_URL = '/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
