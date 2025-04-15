@@ -14,3 +14,15 @@ venv/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Django: Static & Media (DO NOT TRACK THESE)
+staticfiles/
+media/
+
+# VS Code & PyCharm
+.vscode/
+.idea/
+
+# Python environment helpers
+.env
+

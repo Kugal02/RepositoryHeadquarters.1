@@ -1,33 +1,36 @@
 from django import forms
-from .models import County, UserProfile
-from django.core.exceptions import ValidationError
+from .models import County, UserProfile, CommunityPost
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 
-class SignUpForm(forms.ModelForm):
+
+class SignUpForm(UserCreationForm):
     USER_TYPE_CHOICES = [
         ('provider', 'Provider Agency'),
         ('coordinator', 'State/County Entity'),
     ]
 
-    user_type = forms.ChoiceField(
+    role = forms.ChoiceField(
         choices=USER_TYPE_CHOICES,
         widget=forms.RadioSelect,
-        required=True
+        required=True,
+        label="User Type"
     )
-
-    username = forms.CharField(max_length=75, label="Agency Name")
-    password = forms.CharField(widget=forms.PasswordInput)
-    confirm_password = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
 
     STATE_CHOICES = [
         ('OR', 'Oregon'),
-        ('WA', 'Washington'),
-        ('CA', 'California'),
     ]
-    state = forms.ChoiceField(choices=sorted(STATE_CHOICES, key=lambda x: x[1]), initial='OR', required=True)
+
+    state = forms.ChoiceField(
+        choices=sorted(STATE_CHOICES, key=lambda x: x[1]),
+        widget=forms.Select,
+        initial='OR',
+        required=True,
+        label='State'
+    )
 
     counties = forms.ModelMultipleChoiceField(
-        queryset=County.objects.all(),
+        queryset=County.objects.none(),
         widget=forms.CheckboxSelectMultiple
     )
 
@@ -38,33 +41,32 @@ class SignUpForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['user_type', 'username', 'password', 'confirm_password', 'state', 'counties', 'agree_to_terms']
+        fields = ['username', 'password1', 'password2']
 
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        confirm = cleaned_data.get("confirm_password")
-        if password and confirm and password != confirm:
-            raise ValidationError("Passwords do not match.")
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['counties'].queryset = County.objects.all()
+        self.fields['state'].widget = forms.Select()
+
 
 class UserProfileEditForm(forms.ModelForm):
     profile_image = forms.ImageField(required=False)
 
     # Service toggles
-    residential_referrals = forms.BooleanField(required=False, label="Accepting Residential Services")
-    afc_referrals = forms.BooleanField(required=False, label="Accepting Adult Foster Care")
-    behavior_referrals = forms.BooleanField(required=False, label="Accepting Behavior Services")
-    dsa_facility_referrals = forms.BooleanField(required=False, label="Accepting DSA Facility Services")
-    dsa_community_referrals = forms.BooleanField(required=False, label="Accepting DSA Community Services")
-    dsa_community_solo_referrals = forms.BooleanField(required=False, label="Accepting DSA Community Solo Services")
-    vocational_rehabilitation_referrals = forms.BooleanField(required=False, label="Accepting Vocational Rehabilitation Services")
-    career_exploration_referrals = forms.BooleanField(required=False, label="Accepting Career Exploration Services")
-    job_development_referrals = forms.BooleanField(required=False, label="Accepting Job Development Services")
-    job_coaching_referrals = forms.BooleanField(required=False, label="Accepting Job Coaching Services")
-    job_search_assistance_referrals = forms.BooleanField(required=False, label="Accepting Job Search Assistance Services")
-    employment_path_community_referrals = forms.BooleanField(required=False, label="Accepting Employment Path Community Services")
-    employment_path_community_solo_referrals = forms.BooleanField(required=False, label="Accepting Employment Path Community Solo Services")
-    adl_iadl_referrals = forms.BooleanField(required=False, label="Accepting ADL/IADL Services")
+    residential_referrals = forms.BooleanField(required=False)
+    afc_referrals = forms.BooleanField(required=False)
+    behavior_referrals = forms.BooleanField(required=False)
+    dsa_facility_referrals = forms.BooleanField(required=False)
+    dsa_community_referrals = forms.BooleanField(required=False)
+    dsa_community_solo_referrals = forms.BooleanField(required=False)
+    vocational_rehabilitation_referrals = forms.BooleanField(required=False)
+    career_exploration_referrals = forms.BooleanField(required=False)
+    job_development_referrals = forms.BooleanField(required=False)
+    job_coaching_referrals = forms.BooleanField(required=False)
+    job_search_assistance_referrals = forms.BooleanField(required=False)
+    employment_path_community_referrals = forms.BooleanField(required=False)
+    employment_path_community_solo_referrals = forms.BooleanField(required=False)
+    adl_iadl_referrals = forms.BooleanField(required=False)
 
     # Count inputs
     residential_referrals_count = forms.IntegerField(required=False, min_value=0, max_value=99)
@@ -81,7 +83,6 @@ class UserProfileEditForm(forms.ModelForm):
     employment_path_community_referrals_count = forms.IntegerField(required=False, min_value=0, max_value=99)
     employment_path_community_solo_referrals_count = forms.IntegerField(required=False, min_value=0, max_value=99)
     adl_iadl_referrals_count = forms.IntegerField(required=False, min_value=0, max_value=99)
-
 
     class Meta:
         model = UserProfile
@@ -103,6 +104,7 @@ class UserProfileEditForm(forms.ModelForm):
             'profile_image',
             'notes',
             'website',
+            'agency_name',
         ]
         widgets = {
             'notes': forms.Textarea(attrs={
@@ -127,10 +129,53 @@ class UserProfileEditForm(forms.ModelForm):
 
         return cleaned_data
 
-    class SignUpForm(forms.Form):  # or forms.ModelForm
-        # other fields ...
-        counties = forms.ModelMultipleChoiceField(
-            queryset=County.objects.all(),
-            widget=forms.CheckboxSelectMultiple,
-            required=True
-        )
+
+class CommunityPostForm(forms.ModelForm):
+    class Meta:
+        model = CommunityPost
+        fields = [
+            'county',
+            'post_type',
+            'event_date',
+            'title',
+            'description',
+            'employer_name',
+            'employer_website',
+        ]
+        widgets = {
+            'county': forms.Select(attrs={'class': 'form-control'}),
+            'post_type': forms.Select(attrs={'class': 'form-control'}),
+            'event_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'maxlength': '750',
+                'rows': 4,
+                'placeholder': 'Enter a brief description (max 750 characters)'
+            }),
+            'employer_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'employer_website': forms.URLInput(attrs={'class': 'form-control'}),
+        }
+
+class CoordinatorProfileEditForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = [
+            'entity_type',
+            'state',
+            'counties',
+            'contact_first_name',
+            'contact_last_name',
+            'contact_email',
+            'contact_phone_number',
+            'contact_address',
+            'job_title',
+            'profile_image',
+            'notes',
+            'website',
+        ]
+        widgets = {
+            'counties': forms.CheckboxSelectMultiple(),
+            'notes': forms.Textarea(attrs={'rows': 3, 'maxlength': '500'}),
+        }
+

@@ -1,0 +1,329 @@
+{% load static form_extras %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>State/County Entities</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #0d6efd; /* Bootstrap's primary color */
+            min-height: 60px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .main-container {
+            margin-top: 80px;  /* Adjust this based on the header height */
+        }
+
+        .header-left,
+        .header-right {
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+        }
+
+        .header-center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            white-space: nowrap;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: bold;
+            margin: 0;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: white;
+            margin: 0;
+            padding-top: 0.2rem;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 20px auto;
+            background: white;
+            padding: 2em;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-form, .export-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1em;
+        }
+        .filter-field {
+            height: 42px;
+            font-size: 1rem;
+         padding: 0 0.75rem;
+            border-radius: 4px;
+            border: 1px solid black;
+            line-height: normal;
+            box-sizing: border-box;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+
+select.filter-field {
+    background-color: white;
+    padding-right: 2rem; /* make room for dropdown arrow */
+}
+
+        #filter-form input {
+            padding: 0.8em 1em !important;  /* Increase padding for height */
+            height: 40px !important;         /* Set a specific height */
+            width: 300px !important;         /* Keep width the same */
+            font-size: 1.0rem;
+            border-radius: 4px;
+            border: 1px solid black;
+        }
+
+        /* Style for the dropdown */
+        #filter-form select {
+    height: 40px;
+    padding: 0 12px;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 4px;
+    border: 1px solid black;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+        /* Adjusted export-link button */
+        .export-link {
+            padding: 0.4em 1em;
+            background-color: #f8f9fa;
+            color: black;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            border: 1px solid royalblue;
+        }
+
+        /* Back button styling */
+        .back-button {
+            padding: 0.4em 1em;
+            background-color: #f8f9fa;
+            color: black;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 1.0rem;
+            border: none;
+        }
+
+        .county-group {
+            margin-bottom: 2em;
+        }
+
+        .pagination {
+            margin-top: 2em;
+            text-align: center;
+        }
+
+        .pagination span, .pagination a {
+            margin: 0 5px;
+        }
+
+        .sticky-bar {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            padding: 1rem;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .provider-list {
+            margin-left: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <a href="{% url 'export_pdf' %}?q={{ search_query }}&county={{ selected_county }}" class="export-link">Export PDF</a>
+    </div>
+    <div class="header-center">
+        <div class="page-title-group">
+            <h1 class="page-title">State/County Entities</h1>
+            <p class="page-subtitle">(ProviderAgencyPortal.com)</p>
+        </div>
+    </div>
+    <div class="header-right">
+        <button onclick="window.print()" class="export-link">Print</button>
+        <a href="{% url 'dashboard' %}" class="back-button">Back</a>
+    </div>
+</header>
+
+<div class="main-container">
+    <div class="sticky-bar">
+    <form method="get" id="filter-form" action="{% url 'state_county_directory' %}" style="display: flex; gap: 10px; align-items: center;">
+    <input type="text" name="q" value="{{ search_query }}" placeholder="Search by Name..." class="filter-field" id="search-box" style="width: 250px;" />
+
+    <select name="entity_type" id="entity-type-select" class="filter-field">
+        <option value="">All Entities</option>
+        <option value="odds" {% if selected_entity_type == 'odds' %}selected{% endif %}>ODDS</option>
+        <option value="vr" {% if selected_entity_type == 'vr' %}selected{% endif %}>VR</option>
+    </select>
+
+    <select name="county" id="county-select" class="filter-field">
+        <option value="">All Counties</option>
+        {% for county in counties %}
+            <option value="{{ county.id }}" {% if county.id|stringformat:"s" == selected_county %}selected{% endif %}>{{ county.name }}</option>
+        {% endfor %}
+    </select>
+</form>
+
+
+</div>
+
+    <div class="provider-list">
+        {% for provider in page_obj %}
+        <div class="county-group" style="margin-top: 1.5rem;">
+            <!-- Name, Entity Type, Job Title, Last Login in One Row -->
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="flex: 1; display: flex; align-items: center;">
+                    <h4 style="margin: 0; font-size: 1.1rem;">
+                        {% if provider.contact_first_name %}
+                            {{ provider.contact_first_name }}
+                        {% endif %}
+
+                        {% if provider.contact_last_name %}
+                            {{ provider.contact_last_name }}
+                        {% endif %}
+                        &mdash;
+                        {% if provider.entity_type %}
+                            {{ provider.entity_type|upper }}
+                        {% endif %}
+                    </h4>
+                    <span style="font-size: 1rem; font-weight: bold; margin-left: 10px;">
+                        {{ provider.job_title }}
+                    </span>
+                </div>
+
+                <div style="text-align: right; margin-left: 1rem;">
+                    <small style="font-style: italic; color: #555; font-weight: normal;">
+                        {% if provider.user.last_login %}
+                            Last login: {{ provider.user.last_login|date:"m/d/Y h:ia" }}
+                        {% else %}
+                            Last login: Never
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+
+            <!-- Address, Phone Number, and Email -->
+            <div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; align-items: baseline;">
+                <span style="font-size: 1rem; margin-right: 1rem; color: forestgreen;">Address:</span>
+                <span style="font-size: 1rem; margin-right: 1rem;">{{ provider.contact_address }}</span><br>
+
+                <span style="font-size: 1rem; margin-right: 1rem; color: forestgreen;">Phone Number:</span>
+                <span style="font-size: 1rem; margin-right: 1rem;">{{ provider.contact_phone_number|phone_format }}</span>
+
+                <span style="font-size: 1rem; color: forestgreen;">Email:</span>
+                <span style="font-size: 1rem;">{{ provider.contact_email }}</span>
+            </div>
+
+            <!-- Notes -->
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 0.5rem;">
+                <span style="font-size: 1rem;">{{ provider.notes }}</span>
+            </div>
+
+            {% if provider.user == request.user %}
+            <!-- Container for Edit Profile button aligned to the left -->
+            <div style="display: flex; justify-content: flex-start; width: 100%; margin-top: 0.5rem;">
+                <a href="{% url 'edit_coordinator_profile' %}" style="color: #007bff; text-decoration: none;">(Edit Your Profile)</a>
+            </div>
+            {% endif %}
+
+            <hr>
+        </div>
+        {% empty %}
+        <p>No matching entities found.</p>
+        {% endfor %}
+    </div>
+
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&entity_type={{ selected_entity_type }}">Previous</a>
+        {% endif %}
+
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&entity_type={{ selected_entity_type }}">Next</a>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const entityDropdown = document.getElementById('entity-type-select');
+        entityDropdown.addEventListener('change', function () {
+            document.getElementById('filter-form').submit();
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selects = ['entity-type-select', 'county-select'];
+        selects.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', function () {
+                    document.getElementById('filter-form').submit();
+                });
+            }
+        });
+    });
+</script>
+
+<script>
+    let debounceTimeout;
+    const searchBox = document.getElementById("search-box");
+
+    searchBox.addEventListener("input", function() {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(function() {
+            document.getElementById("filter-form").submit(); // Submit the form after the user stops typing
+        }, 500); // Wait for 500ms after the user stops typing
+    });
+</script>
+
+
+</body>
+</html>

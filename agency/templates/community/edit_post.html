@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Community Post{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-5">
+    <h2 class="mb-4">Edit Community Post</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="mb-3">
+            <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">Title:</label>
+            {{ form.title }}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.post_type.id_for_label }}" class="form-label fw-bold">Post Type:</label>
+            {{ form.post_type }}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.county.id_for_label }}" class="form-label fw-bold">County:</label>
+            {{ form.county }}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.event_date.id_for_label }}" class="form-label fw-bold">Event Date:</label>
+            {{ form.event_date }}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">Description:</label>
+            {{ form.description }}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.employer_name.id_for_label }}" class="form-label fw-bold">Employer Name:</label>
+            {{ form.employer_name }}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.employer_website.id_for_label }}" class="form-label fw-bold">Employer Website:</label>
+            {{ form.employer_website }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Post</button>
+        <a href="{% url 'community_post_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

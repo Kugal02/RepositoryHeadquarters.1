@@ -1,4 +1,6 @@
+{% load contact_filters %}
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,62 +11,99 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        body {
-            background-color: white;
+    header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 70px;
+        background-color: #007bff;
+        color: white;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+    }
+
+    /* Push main content down so it doesn't go under the fixed header */
+    .dashboard-container {
+        margin-top: 60px; /* slightly more than header height */
+    }
+
+    .sidebar {
+        background-color: #fff;
+        padding: 1em;
+        border-right: 1px solid #ccc;
+        height: 100%;
+    }
+
+    .main-content {
+        background-color: #fff;
+        padding: 2em;
+    }
+
+    .list-group-item.active {
+        background-color: transparent !important;
+        color: #ffffff !important;
+        border-color: royalblue !important;
+    }
+    .contact-type-text {
+    color: royalblue;
+    font-weight: bold;
+}
+    .custom-website-btn {
+    color: white !important;
+    background-color: dodgerblue !important;
+    border-color: transparent !important;
+    font-weight: bold !important;
+}
+
+    @media (max-width: 768px) {
+        .dashboard-container .col-lg-2 {
+            flex: 1 0 25%;
         }
 
-        .sidebar {
-            background-color: #fff;
-            padding: 1em;
-            border-right: 1px solid #ccc;
+        .dashboard-container .col-lg-7,
+        .dashboard-container .col-lg-3 {
+            flex: 1 0 75%;
         }
+    }
+</style>
 
-        .main-content {
-            background-color: #fff;
-            padding: 2em;
-        }
-
-        .dashboard-container {
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-container .col-lg-2 {
-                flex: 1 0 25%;
-            }
-            .dashboard-container .col-lg-7,
-            .dashboard-container .col-lg-3 {
-                flex: 1 0 75%;
-            }
-        }
-    </style>
 </head>
 <body>
 
 <header class="bg-primary text-white p-3">
     <div class="container-fluid">
-        <div class="row align-items-center">
-            <!-- Left Column -->
-            <div class="col-md-6 d-flex align-items-center gap-3 mb-3 mb-md-0">
-                <strong class="fs-3">ProviderAgencyPortal.com</strong>
+    <div class="row align-items-center">
+        <div class="col-md-6 d-flex align-items-center gap-3">
+    <strong class="fs-3 text-white">ProviderAgencyPortal.com</strong>
 
-            </div>
+        <a href="{% url 'state_county_directory' %}" class="btn text-white" style="background: transparent; border: none;">
+            State/County Directory
+        </a>
+         <a href="{% url 'community_post_create' %}" class="btn text-white" style="background: transparent; border: none;">
+            Post to Community Board
+        </a>
 
-            <!-- Right Column -->
-            {% if request.user.is_authenticated %}
-            <div class="col-md-6 d-flex justify-content-md-end align-items-center gap-1">
-                <span class="fw-bold">{{ request.user.username }}</span>
-                <form method="POST" action="{% url 'logout' %}" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-light btn-sm">Logout</button>
-                </form>
-            </div>
-            {% endif %}
-        </div>
+        <a href="{% url 'community_post_list' %}" class="btn text-white" style="background: transparent; border: none;">
+            View Community Posts
+        </a>
+
     </div>
-</header>
 
+        {% if request.user.is_authenticated %}
+        <div class="col-md-6 d-flex justify-content-md-end align-items-center gap-3">
+            <span class="fw-bold fs-5">{{ request.user.display_name|default:request.user.email }}</span>
+            <form method="POST" action="{% url 'logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-light btn-sm">Logout</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+</header>
 
 <div class="container-fluid dashboard-container">
     <div class="container-fluid">
@@ -75,120 +114,167 @@
                 <div class="mb-3">
                     <input type="text" class="form-control" id="providerSearch" placeholder="Search Providers..." onkeyup="searchProviders()">
                 </div>
-                <div class="referral-status mb-3">
-                    <p><strong>Referral Status:</strong></p>
-                    <select id="referral_status_select" class="form-select form-select-sm" onchange="updateReferralStatus()">
-                        <option value="accepting" {% if profile.referral_status == 'accepting' %}selected{% endif %}>Accepting</option>
-                        <option value="not_accepting" {% if profile.referral_status == 'not_accepting' %}selected{% endif %}>Not Accepting</option>
-                    </select>
-                </div>
 
-                <!-- Filter by County -->
-<div class="mb-3">
-    <label for="county-filter" class="form-label fw-bold">Filter by:</label>
-    <form method="get">
-        <select name="county" id="county-filter" onchange="this.form.submit()" class="form-select form-select-sm">
-            <option value="">All Counties</option>
-            {% for county in distinct_counties %}
-                <option value="{{ county.id }}" {% if county.id == selected_county %}selected{% endif %}>
-                    {{ county.name|title }}
-                </option>
-            {% endfor %}
-        </select>
-    </form>
-</div>
+                <!-- Combined Filter Form -->
+                <form method="get" id="filter-form">
+                    <div class="referral-status mb-3">
+                        <p><strong>Referral Status:</strong></p>
+                        <select name="referral_status" id="referral_status_select" class="form-select form-select-sm"
+                                onchange="document.getElementById('filter-form').submit();">
+                            <option value="">All Providers</option>
+                            <option value="accepting" {% if referral_status_filter == 'accepting' %}selected{% endif %}>Accepting</option>
+                            <option value="not_accepting" {% if referral_status_filter == 'not_accepting' %}selected{% endif %}>Not Accepting</option>
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="county-filter" class="form-label fw-bold">County:</label>
+                        <select name="county" id="county-filter" class="form-select form-select-sm"
+                                onchange="document.getElementById('filter-form').submit();">
+                            <option value="">All Counties</option>
+                            {% for county in distinct_counties %}
+                                <option value="{{ county.id }}" {% if county.id|stringformat:"s" == selected_county|stringformat:"s" %}selected{% endif %}>
+                                    {{ county.name|title }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="service-filter" class="form-label fw-bold">Service Type:</label>
+                            <select name="service_filter" id="service-filter" class="form-select form-select-sm"
+                                onchange="document.getElementById('filter-form').submit();">
+                                <option value="">All Services</option>
+                                {% for service_key, service_label in service_choices %}
+                                    <option value="{{ service_key }}" {% if selected_service == service_key %}selected{% endif %}>
+                                {{ service_label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                    </div>
+                </form>
 
                 <ul id="providerList" class="list-group">
                     {% for provider in all_providers %}
-                    <li class="list-group-item">
-                        <a href="?provider_id={{ provider.id }}">
-                            {{ provider.user.username }}
-                        </a>
-                    </li>
+                        {% if provider.role == 'provider' %}
+                            <li class="list-group-item {% if selected_provider and provider.id == selected_provider.id %}active{% endif %}">
+                                <a href="?provider_id={{ provider.id }}{% if referral_status_filter %}&referral_status={{ referral_status_filter }}{% endif %}{% if selected_county %}&county={{ selected_county }}{% endif %}{% if selected_service %}&service_filter={{ selected_service }}{% endif %}">
+                                    {{ provider.user.display_name|default:provider.user.email }}
+                                </a>
+                            </li>
+                        {% endif %}
                     {% endfor %}
                 </ul>
-
-                </div>
-
-            <!-- Middle Column -->
-            <div class="col-lg-7 col-md-6 col-sm-12 main-content">
-                {% if selected_provider %}
-                    <h3>{{ selected_provider.user.username }}</h3>
-                    {% if last_login_display %}
-                        <p class="mb-3"
-                        style="color: {% if last_login_status == 'old' %}red{% else %}green{% endif %}; font-size: 0.9rem;">
-                    Last login: {{ last_login_display }}
-                    </p>
-                {% endif %}
-
-        {% if selected_provider.user.id == request.user.id %}
-            <div class="mb-3">
-                <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm">Edit My Info</a>
             </div>
+
+            <!-- Main Content -->
+<div class="col-lg-6 col-md-6 col-sm-12 main-content">
+    {% if coordinator_message %}
+    <div class="d-flex align-items-center mb-4" style="margin-top: 200px;">
+        <img src="{% static 'images/HappyGuy1.png' %}" alt="Welcome!" style="max-width: 200px; margin-right: 30px;">
+        <p class="text-primary fw-bold fs-5 m-0">
+            {{ coordinator_message }}
+        </p>
+    </div>
+    {% elif selected_provider and selected_provider.role == "provider" %}
+        <h1 class="fs-3 fw-bold">
+            {{ selected_provider.user.display_name|default:selected_provider.user.email }}
+        </h1>
+
+        {% if last_login_display %}
+            <p class="mb-3" style="color: {% if last_login_status == 'old' %}red{% else %}green{% endif %}; font-size: 0.9rem;">
+                Last login: {{ last_login_display }}
+            </p>
         {% endif %}
 
-        <div class="contact-info" style="line-height: .5; margin-bottom: 1rem;">
-            <p><strong>Contact Name:</strong> {{ selected_provider.contact_first_name }} {{ selected_provider.contact_last_name }}</p>
-            <p><strong>Phone:</strong> {{ selected_provider.contact_phone_number }}</p>
-            <p><strong>Email:</strong> {{ selected_provider.contact_email }}</p>
-            <p><strong>Address:</strong> {{ selected_provider.contact_address }}</p>
+        <!-- Unified button group -->
+        <div class="d-flex gap-2 align-items-center mb-3">
+            {% if selected_provider.user.id == request.user.id and profile.role == "provider" %}
+                <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm">Edit My Info</a>
+            {% endif %}
             {% if selected_provider.website %}
-            <p>
-                <strong>Website:</strong>
-                <a href="{{ selected_provider.website }}" target="_blank" rel="noopener noreferrer">
-                    {{ selected_provider.website }}
+                <a href="{{ selected_provider.website }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                    Visit Website
                 </a>
-            </p>
             {% endif %}
         </div>
-                {% if selected_provider.notes %}
-                <div class="mt-3">
-                    <h5>Additional Notes:</h5>
-                    <p style="white-space: pre-wrap;">{{ selected_provider.notes }}</p>
-                </div>
-                {% endif %}
-                <div>
-                    <p><strong>Referral Status:</strong> {{ selected_provider.referral_status|title }}</p>
-                    <ul>
-                        {% if selected_provider.residential_referrals %}<li>Residential Services — Accepting up to {{ selected_provider.residential_referrals_count }}</li>{% endif %}
-                        {% if selected_provider.afc_referrals %}<li>Adult Foster Care — Accepting up to {{ selected_provider.afc_referrals_count }}</li>{% endif %}
-                        {% if selected_provider.behavior_referrals %}<li>Behavior Services — Accepting up to {{ selected_provider.behavior_referrals_count }}</li>{% endif %}
-                        {% if selected_provider.dsa_facility_referrals %}<li>DSA Facility Services — Accepting up to {{ selected_provider.dsa_facility_referrals_count }}</li>{% endif %}
-                        {% if selected_provider.dsa_community_referrals %}<li>DSA Community Services — Accepting up to {{ selected_provider.dsa_community_referrals_count }}</li>{% endif %}
-                        {% if selected_provider.dsa_community_solo_referrals %}<li>DSA Community Solo Services — Accepting up to {{ selected_provider.dsa_community_solo_referrals_count }}</li>{% endif %}
-                        {% if selected_provider.vocational_rehabilitation_referrals %}<li>Vocational Rehabilitation — Accepting up to {{ selected_provider.vocational_rehabilitation_referrals_count }}</li>{% endif %}
-                        {% if selected_provider.career_exploration_referrals %}<li>Career Exploration — Accepting up to {{ selected_provider.career_exploration_referrals_count }}</li>{% endif %}
-                        {% if selected_provider.job_development_referrals %}<li>Job Development — Accepting up to {{ selected_provider.job_development_referrals_count }}</li>{% endif %}
-                        {% if selected_provider.job_coaching_referrals %}<li>Job Coaching — Accepting up to {{ selected_provider.job_coaching_referrals_count }}</li>{% endif %}
-                        {% if selected_provider.job_search_assistance_referrals %}<li>Job Search Assistance — Accepting up to {{ selected_provider.job_search_assistance_referrals_count }}</li>{% endif %}
-                        {% if selected_provider.employment_path_community_referrals %}<li>Employment Path Community — Accepting up to {{ selected_provider.employment_path_community_referrals_count }}</li>{% endif %}
-                        {% if selected_provider.employment_path_community_solo_referrals %}<li>Employment Path Community Solo — Accepting up to {{ selected_provider.employment_path_community_solo_referrals_count }}</li>{% endif %}
-                        {% if selected_provider.adl_iadl_referrals %}<li>ADL/IADL Services — Accepting up to {{ selected_provider.adl_iadl_referrals_count }}</li>{% endif %}
-                    </ul>
-                </div>
-                {% else %}
-                <p>Select a provider from the left panel to view their details.</p>
-                {% endif %}
-            </div>
 
-            <!-- Right Column for Photo -->
-            <div class="col-lg-3 col-md-3 col-sm-12" style="margin-top: 20px;">
-                {% if selected_provider.profile_image %}
-                <div class="card">
-                    <img src="{{ selected_provider.profile_image.url }}" class="card-img-top img-fluid rounded" style="max-width: 100%; max-height: 300px; object-fit: cover;" alt="Profile Image">
-                </div>
+        <!-- Contact info -->
+        <div class="contact-info mb-4">
+            <h4>Contacts</h4>
+            <div class="row">
+                {% if contacts %}
+                    {% for contact in contacts %}
+                        <div class="col-md-6 mb-4">
+                            <div class="p-2 border rounded shadow-sm h-100">
+                                <p><strong>Contact Name:</strong> {{ contact.first_name }} {{ contact.last_name }}</p>
+                                <p><strong>Phone:</strong> {{ contact.phone_number }}</p>
+                                <p><strong>Email:</strong> <a href="mailto:{{ contact.email }}">{{ contact.email }}</a></p>
+                                <p><strong>Address:</strong> {{ contact.address }}</p>
+                                <p><strong style="color: #007bff;">Contact Type:</strong> {{ contact.contact_type|contact_type_display }}</p>
+                                {% if contact.contact_type == 'other_services' %}
+                                    <p><strong>Other Description:</strong> {{ contact.other_service_desc }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
                 {% else %}
-                <p class="text-muted">No image uploaded</p>
+                    <p>No contacts available.</p>
                 {% endif %}
             </div>
         </div>
-    </div>
+    {% endif %}
 </div>
 
-    <!-- END: Dashboard Main Layout -->
+            <!-- Right Sidebar: Profile Image + Referral Status -->
+<div class="col-lg-4 col-md-3 col-sm-12" style="margin-top: 20px;">
+    {% if selected_provider and selected_provider.role == "provider" %}
+        {% if selected_provider.profile_image %}
+            <div class="card mb-3">
+                <img src="{{ selected_provider.profile_image.url }}" class="card-img-top img-fluid rounded" style="max-width: 100%; max-height: 300px; object-fit: cover;" alt="Profile Image">
+            </div>
+        {% else %}
+            <p class="text-muted">No image uploaded</p>
+        {% endif %}
+
+        <div class="card p-3">
+            <h5 class="text-primary mb-2">Referral Status</h5>
+            {% if selected_provider.referral_status == 'accepting' %}
+                <p><strong>Status:</strong> <span style="color: green; font-weight: bold;">Accepting Referrals</span></p>
+            {% else %}
+                <p><strong>Status:</strong> <span style="color: red; font-weight: bold;">Not Accepting Referrals</span></p>
+            {% endif %}
+
+            <ul class="mb-0 ps-3">
+                {% if selected_provider.residential_referrals %}<li>Residential Services — Accepting up to {{ selected_provider.residential_referrals_count }}</li>{% endif %}
+                {% if selected_provider.afc_referrals %}<li>Adult Foster Care — Accepting up to {{ selected_provider.afc_referrals_count }}</li>{% endif %}
+                {% if selected_provider.behavior_referrals %}<li>Behavior Services — Accepting up to {{ selected_provider.behavior_referrals_count }}</li>{% endif %}
+                {% if selected_provider.dsa_facility_referrals %}<li>DSA Facility — Accepting up to {{ selected_provider.dsa_facility_referrals_count }}</li>{% endif %}
+                {% if selected_provider.dsa_community_referrals %}<li>DSA Community — Accepting up to {{ selected_provider.dsa_community_referrals_count }}</li>{% endif %}
+                {% if selected_provider.dsa_community_solo_referrals %}<li>DSA Community Solo — Accepting up to {{ selected_provider.dsa_community_solo_referrals_count }}</li>{% endif %}
+                {% if selected_provider.vocational_rehabilitation_referrals %}<li>Vocational Rehab — Accepting up to {{ selected_provider.vocational_rehabilitation_referrals_count }}</li>{% endif %}
+                {% if selected_provider.career_exploration_referrals %}<li>Career Exploration — Accepting up to {{ selected_provider.career_exploration_referrals_count }}</li>{% endif %}
+                {% if selected_provider.job_development_referrals %}<li>Job Development — Accepting up to {{ selected_provider.job_development_referrals_count }}</li>{% endif %}
+                {% if selected_provider.job_coaching_referrals %}<li>Job Coaching — Accepting up to {{ selected_provider.job_coaching_referrals_count }}</li>{% endif %}
+                {% if selected_provider.job_search_assistance_referrals %}<li>Job Search Assistance — Accepting up to {{ selected_provider.job_search_assistance_referrals_count }}</li>{% endif %}
+                {% if selected_provider.employment_path_community_referrals %}<li>Employment Path — Accepting up to {{ selected_provider.employment_path_community_referrals_count }}</li>{% endif %}
+                {% if selected_provider.employment_path_community_solo_referrals %}<li>Employment Path Solo — Accepting up to {{ selected_provider.employment_path_community_solo_referrals_count }}</li>{% endif %}
+                {% if selected_provider.adl_iadl_referrals %}<li>ADL/IADL Services — Accepting up to {{ selected_provider.adl_iadl_referrals_count }}</li>{% endif %}
+            </ul>
+        </div>
+
+        {% if selected_provider.notes %}
+            <div class="mt-3">
+                <h5>Additional Notes:</h5>
+                <p style="white-space: pre-wrap;">{{ selected_provider.notes }}</p>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
 
 
-    <script>
+<script>
     function updateReferralStatus() {
         const referralStatus = document.getElementById("referral_status_select").value;
 
@@ -210,9 +296,7 @@
             }
         });
     }
-</script>
 
-<script>
     function searchProviders() {
         const searchInput = document.getElementById('providerSearch').value.toLowerCase();
         const providerList = document.getElementById('providerList');
@@ -252,6 +336,10 @@
     });
 </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<form id="csrf-form" style="display: none;">
+    {% csrf_token %}
+</form>
+
 </body>
 </html>

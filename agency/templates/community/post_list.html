@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Community Posts{% endblock %}
+
+{% block content %}
+<header class="bg-primary text-white py-3 px-4 fixed-top w-100">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="fs-3 mb-0">ProviderAgencyPortal.com - Community Posts</h2>
+        <div class="no-print d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-light btn-sm text-dark">Print</button>
+            <a href="{% url 'export_community_posts_pdf' %}" class="btn btn-light btn-sm text-dark">Export PDF</a>
+            <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm text-dark">Back</a>
+        </div>
+    </div>
+</header>
+
+<div class="no-print mt-1 pt-1" style="margin-top: 2rem;">
+    <form method="get" class="row g-3 align-items-center mb-4">
+        <div class="col-md-auto">
+            <label for="type" class="form-label fw-bold">Filter by Type:</label>
+            <select name="type" class="form-select" id="type" onchange="this.form.submit()" style="width: 180px;">
+                <option value="">All</option>
+                <option value="event" {% if selected_type == "event" %}selected{% endif %}>Event</option>
+                <option value="placement" {% if selected_type == "placement" %}selected{% endif %}>Job Placement</option>
+                <option value="employer" {% if selected_type == "employer" %}selected{% endif %}>Employer Hiring</option>
+            </select>
+        </div>
+
+        <div class="col-md-auto">
+            <label for="county" class="form-label fw-bold">Filter by County:</label>
+            <select name="county" class="form-select" id="county" onchange="this.form.submit()" style="width: 180px;">
+                <option value="">All Counties</option>
+                {% for county in counties %}
+                    <option value="{{ county.id }}" {% if county.id|stringformat:"s" == selected_county %}selected{% endif %}>{{ county.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-auto">
+            <label for="start_date" class="form-label fw-bold">Event Start Date:</label>
+            <input type="date" class="form-control" name="start_date" value="{{ start_date }}" onchange="this.form.submit()">
+        </div>
+
+        <div class="col-md-auto">
+            <label for="end_date" class="form-label fw-bold">Event End Date:</label>
+            <input type="date" class="form-control" name="end_date" value="{{ end_date }}" onchange="this.form.submit()">
+        </div>
+    </form>
+</div>
+
+{% for post in posts %}
+<div class="border rounded p-3 mb-3 shadow-sm">
+
+    <!-- Title and Reactions -->
+    <div class="d-flex justify-content-between align-items-start flex-wrap">
+        <h5 class="fw-bold mb-1">{{ post.title }}</h5>
+        <div class="reaction-buttons d-flex gap-1 mt-1 mt-md-0">
+            {% for emoji in reaction_emojis %}
+                {% with count=reaction_counts|dict_get:post.id|dict_get:emoji|default_if_none:"0" %}
+                    {% with reacted=reaction_data|dict_get:post.id|dict_get:emoji %}
+                        <button
+                            class="reaction-btn btn btn-sm {% if reacted %}btn-success{% else %}btn-outline-secondary{% endif %}"
+                            data-emoji="{{ emoji }}"
+                            data-post-id="{{ post.id }}"
+                        >
+                            {{ emoji }} {{ count }}
+                        </button>
+                    {% endwith %}
+                {% endwith %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Description -->
+    <p class="mb-2">{{ post.description }}</p>
+
+    <!-- Meta Info and Visit Website -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap small text-muted mb-2">
+        <div>
+            <strong>Posted by:</strong>
+            {% if post.created_by and post.created_by.user %}
+                {{ post.created_by.user.display_name|default:post.created_by.user.email }}
+            {% else %}
+                Unknown
+            {% endif %}
+            |
+            <strong>Posted:</strong> {{ post.created_at|date:"M d, Y" }} |
+            <strong>Type:</strong> {{ post.get_post_type_display }} |
+            <strong>County:</strong> {{ post.county.name }}
+            {% if post.event_date %} |
+                <strong>Event Date:</strong>
+                <span class="text-success">{{ post.event_date|date:"M d, Y" }}</span>
+            {% endif %}
+        </div>
+
+        {% if post.employer_website %}
+            <div class="mt-1 mt-md-0 ms-md-auto">
+                <a href="{{ post.employer_website }}" target="_blank" class="text-primary fw-bold text-decoration-none">
+                    Visit Website
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Edit/Delete -->
+    {% if request.user == post.created_by.user %}
+        <div class="d-flex gap-2 mt-2">
+            <a href="{% url 'edit_post' post.id %}" class="btn btn-outline-primary btn-sm">Edit</a>
+            <form action="{% url 'delete_post' post.id %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+            </form>
+        </div>
+    {% endif %}
+</div>
+{% empty %}
+<p>No community posts found.</p>
+{% endfor %}
+
+
+<style>
+
+@media print {
+    .break-inside-avoid {
+        page-break-inside: avoid;
+    }
+    header {
+        display: none !important;
+    }
+}
+
+.reaction-btn {
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    line-height: 1.2;
+}
+body {
+    padding-top: 60px; /* match or exceed your header height */
+  }
+
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".reaction-btn").forEach(function (btn) {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      const emoji = this.dataset.emoji;
+      const postId = this.dataset.postId;
+      const csrfToken = '{{ csrf_token }}';
+      const button = this;
+
+      fetch("{% url 'toggle_reaction' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": csrfToken
+        },
+        body: new URLSearchParams({ emoji: emoji, post_id: postId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'ok') {
+          // Update button count
+          button.innerHTML = `${emoji} ${data.count}`;
+
+          // Explicitly set button class
+          if (data.action === 'added') {
+            button.classList.remove('btn-outline-secondary');
+            button.classList.add('btn-success');
+          } else {
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+          }
+        }
+      });
+    });
+  });
+});
+</script>
+
+
+{% endblock %}

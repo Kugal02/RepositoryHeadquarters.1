@@ -1,4 +1,6 @@
 {% load static %}
+{% load form_tags %}
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -27,6 +29,15 @@
             max-width: 400px;
             width: 100%;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-container form input {
+            width: 100%;
+            padding: 0.8em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 1em;
+            box-sizing: border-box;
         }
 
         h1 {
@@ -64,7 +75,7 @@
 
         .form-check {
             display: flex;
-            align-items: center;
+            align-items: baseline;
             gap: 0.5rem;
         }
 
@@ -72,9 +83,22 @@
             margin: 0;
         }
 
-        .form-check-label {
-            font-size: 1rem;
-            color: #333;
+        .form-label {
+            font-weight: bold;
+        }
+
+        /* Force radio/checkbox labels (Provider Agency & Counties) to NOT be bold */
+        .form-check-label,
+        .form-check-label.fw-bold,
+        .form-check-label.font-weight-bold,
+        label[for*="user_type"],
+        label[for*="id_user_type"],
+        label[for*="id_user_type_0"],
+        label[for*="id_user_type_1"],
+        input[type="radio"] + label,
+        input[type="checkbox"] + label {
+            font-weight: normal !important;
+            color: #333 !important;
         }
 
         button {
@@ -119,19 +143,38 @@
                 margin-bottom: 1rem;
             }
         }
+
+        #id_agree_to_terms + label {
+            font-weight: bold !important;
+        }
+
+        /* Smooth show/hide animation */
+        .fade-slide {
+            opacity: 0;
+            transform: translateY(-10px);
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .fade-slide.show {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 1000px; /* big enough to show content */
+        }
+
     </style>
 
 </head>
 
 <body>
-
 <div class="signup-container">
     <h2 class="text-center mb-2">Create Your Account</h2>
     <h5 class="text-center mb-4" style="word-wrap: break-word; overflow-wrap: break-word;">
         (ProviderAgencyPortal.com)
     </h5>
 
-    <form method="POST">
+    <form method="POST" action="{% url 'signup' %}" novalidate>
         {% csrf_token %}
 
         {% if messages %}
@@ -144,48 +187,89 @@
         </div>
         {% endif %}
 
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
         <!-- User Type Field -->
         <div class="mb-3">
-            <label class="form-label fw-bold">User Type:</label>
-            <div>
-                {% for radio in form.user_type %}
-                <div class="form-check">
-                    {{ radio.tag }}
-                    <label class="form-check-label" for="{{ radio.id_for_label }}">
-                        {{ radio.choice_label }}
-                    </label>
-                </div>
-                {% endfor %}
+            <label class="form-label" for="{{ form.user_type.id_for_label }}">
+                User Type
+            </label>
+        </div>
+        {% for radio in form.user_type %}
+        <div class="form-check">
+            {{ radio.tag }}
+            <label class="form-check-label" for="{{ radio.id_for_label }}">
+                {{ radio.choice_label }}
+            </label>
+        </div>
+        {% endfor %}
+
+        <!-- Email Field (only for coordinators) -->
+        <div id="coordinator-email-field" class="fade-slide">
+            <div class="mb-3">
+                <label for="{{ form.email.id_for_label }}" class="form-label">Email Address</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <div class="text-danger">{{ form.email.errors }}</div>
+                {% endif %}
             </div>
-            {% if form.user_type.errors %}
-            <div class="error">{{ form.user_type.errors }}</div>
-            {% endif %}
         </div>
 
-        <!-- Username Field -->
-        <div class="mb-3">
-            <label for="{{ form.username.id_for_label }}" class="form-label">Agency Name</label>
-            {{ form.username }}
-            {% if form.username.errors %}
-            <div class="error">{{ form.username.errors }}</div>
-            {% endif %}
+        <!-- Coordinator Fields - Hidden by default -->
+        <div id="coordinator-fields" class="fade-slide" aria-live="polite">
+            <h5 class="mb-3">State/County Entity Information</h5>
+
+            <div class="mb-3">{{ form.entity_type.label_tag }} {{ form.entity_type }}</div>
+            <div class="mb-3">{{ form.contact_first_name.label_tag }} {{ form.contact_first_name }}</div>
+            <div class="mb-3">{{ form.contact_last_name.label_tag }} {{ form.contact_last_name }}</div>
+            <div class="mb-3">{{ form.job_title.label_tag }} {{ form.job_title }}</div>
+            <div class="mb-3">{{ form.contact_phone_number.label_tag }} {{ form.contact_phone_number }}</div>
+            <!--<div class="mb-3">{{ form.contact_email.label_tag }} {{ form.contact_email }}</div>-->
+            <div class="mb-3">{{ form.contact_address.label_tag }} {{ form.contact_address }}</div>
+
+            <noscript>
+                <div class="alert alert-warning mt-2">
+                    Please enable JavaScript to complete coordinator-specific fields.
+                </div>
+            </noscript>
         </div>
+
+        <!-- Agency Name Field (conditionally shown for providers) -->
+        <!-- Username Field -->
+        <div id="agency-name-field" class="fade-slide show">
+            <div class="mb-3">
+                {{ form.agency_name.label_tag }}
+                {{ form.agency_name }}
+                {% if form.agency_name.errors %}
+                <div class="error text-danger">{{ form.agency_name.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
 
         <!-- Password Field -->
         <div class="mb-3">
-            <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
-            {{ form.password }}
-            {% if form.password.errors %}
-            <div class="error">{{ form.password.errors }}</div>
+            {{ form.password1.label_tag }}
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+            <div class="error text-danger">{{ form.password1.errors }}</div>
             {% endif %}
         </div>
 
         <!-- Confirm Password Field -->
         <div class="mb-3">
-            <label for="{{ form.confirm_password.id_for_label }}" class="form-label">Confirm Password</label>
-            {{ form.confirm_password }}
-            {% if form.confirm_password.errors %}
-            <div class="error">{{ form.confirm_password.errors }}</div>
+            {{ form.password2.label_tag }}
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+            <div class="error text-danger">{{ form.password2.errors }}</div>
             {% endif %}
         </div>
 
@@ -198,12 +282,9 @@
             {% endif %}
         </div>
 
-
         <!-- County Checkboxes -->
         <div class="mb-3">
-            <label class="form-label fw-bold">
-                Counties your agency provides services (or) Counties SC/PA serves:
-            </label>
+            <label class="form-label fw-bold">Counties your agency provides services (or) Counties SC/PA serves:</label>
             <div class="checkbox-container">
                 {% for checkbox in form.counties %}
                 <div class="form-check">
@@ -219,12 +300,12 @@
             {% endif %}
         </div>
 
-        <div class="d-flex align-items-center mb-4">
-            <input type="checkbox" name="agree_to_terms" id="id_agree_to_terms" required
-                   style="width: 1em; height: 1em; margin-right: 0.5rem;">
-            <label for="id_agree_to_terms" class="form-check-label fw-bold mb-0">
-                I agree to the <a href="{% static 'documents/TermsOfServiceV2.pdf' %}" target="_blank">Terms of
-                Service</a>
+        <!-- Agree to Terms -->
+        <div class="mb-3 d-flex align-items-center gap-2">
+            {{ form.agree_to_terms }}
+            <label for="id_agree_to_terms" class="m-0">
+                I agree to the
+                <a href="{% static 'documents/TermsOfServiceV2.pdf' %}" target="_blank">Terms of Service</a>
             </label>
         </div>
 
@@ -235,6 +316,34 @@
         <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const coordinatorFields = document.getElementById("coordinator-fields");
+        const coordinatorEmailField = document.getElementById("coordinator-email-field");
+        const agencyNameField = document.getElementById("agency-name-field");
+        const userTypeRadios = document.querySelectorAll('input[name="user_type"]');
+
+        function toggleCoordinatorFields() {
+            const selectedRole = document.querySelector('input[name="user_type"]:checked');
+            const isCoordinator = selectedRole && selectedRole.value === "coordinator";
+
+            // Show/hide coordinator-specific fields
+            coordinatorFields?.classList.toggle("show", isCoordinator);
+            coordinatorEmailField?.classList.toggle("show", isCoordinator);
+            agencyNameField?.classList.toggle("show", !isCoordinator);
+        }
+
+        userTypeRadios.forEach(radio => {
+            radio.addEventListener("change", toggleCoordinatorFields);
+        });
+
+        toggleCoordinatorFields(); // Run once on page load
+    });
+    document.querySelector("form").addEventListener("submit", function(e) {
+    console.log("FORM SUBMITTED"); // this should appear in browser DevTools
+});
+
+</script>
 
 </body>
 </html>

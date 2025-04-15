@@ -1,0 +1,247 @@
+[
+{
+  "model": "agency.county",
+  "pk": 1,
+  "fields": {
+    "name": "Baker"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 2,
+  "fields": {
+    "name": "Benton"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 3,
+  "fields": {
+    "name": "Clackamas"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 4,
+  "fields": {
+    "name": "Clatsop"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 5,
+  "fields": {
+    "name": "Columbia"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 6,
+  "fields": {
+    "name": "Coos"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 7,
+  "fields": {
+    "name": "Crook"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 8,
+  "fields": {
+    "name": "Curry"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 9,
+  "fields": {
+    "name": "Deschutes"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 10,
+  "fields": {
+    "name": "Douglas"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 11,
+  "fields": {
+    "name": "Gilliam"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 12,
+  "fields": {
+    "name": "Grant"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 13,
+  "fields": {
+    "name": "Harney"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 14,
+  "fields": {
+    "name": "Hood River"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 15,
+  "fields": {
+    "name": "Jackson"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 16,
+  "fields": {
+    "name": "Jefferson"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 17,
+  "fields": {
+    "name": "Josephine"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 18,
+  "fields": {
+    "name": "Klamath"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 19,
+  "fields": {
+    "name": "Lake"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 20,
+  "fields": {
+    "name": "Lane"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 21,
+  "fields": {
+    "name": "Lincoln"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 22,
+  "fields": {
+    "name": "Linn"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 23,
+  "fields": {
+    "name": "Malheur"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 24,
+  "fields": {
+    "name": "Marion"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 25,
+  "fields": {
+    "name": "Morrow"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 26,
+  "fields": {
+    "name": "Multnomah"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 27,
+  "fields": {
+    "name": "Polk"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 28,
+  "fields": {
+    "name": "Tillamook"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 29,
+  "fields": {
+    "name": "Umatilla"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 30,
+  "fields": {
+    "name": "Union"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 31,
+  "fields": {
+    "name": "Wallowa"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 32,
+  "fields": {
+    "name": "Wasco"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 33,
+  "fields": {
+    "name": "Washington"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 34,
+  "fields": {
+    "name": "Wheeler"
+  }
+},
+{
+  "model": "agency.county",
+  "pk": 35,
+  "fields": {
+    "name": "Yamhill"
+  }
+}
+]

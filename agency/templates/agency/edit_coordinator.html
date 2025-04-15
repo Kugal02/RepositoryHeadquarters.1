@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Edit Coordinator Profile{% endblock %}
+
+{% block content %}
+<!-- Fixed header at the top -->
+<div class="bg-primary text-white py-3 px-4 fixed-top w-100">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="fs-3 mb-0">Edit Coordinator Profile</h2>
+        <a href="{% url 'state_county_directory' %}" class="btn btn-light btn-sm text-dark">Back</a>
+    </div>
+</div>
+
+<!-- Add top margin for fixed header -->
+<div class="container pt-5 mt-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-1">  <!-- Left-aligned, offset slightly from edge -->
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li class="{{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data" action="{% url 'edit_coordinator_profile' %}">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                <div class="mb-3 row">
+                    <label for="{{ form.entity_type.id_for_label }}" class="col-sm-3 col-form-label fw-bold text-end">Entity Type</label>
+                    <div class="col-sm-9">
+                        {{ form.entity_type|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <label for="{{ form.job_title.id_for_label }}" class="col-sm-3 col-form-label fw-bold text-end">Job Title</label>
+                    <div class="col-sm-9">
+                        {{ form.job_title|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <label for="{{ form.contact_first_name.id_for_label }}" class="col-sm-3 col-form-label fw-bold text-end">First Name</label>
+                    <div class="col-sm-9">
+                        {{ form.contact_first_name|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <label for="{{ form.contact_last_name.id_for_label }}" class="col-sm-3 col-form-label fw-bold text-end">Last Name</label>
+                    <div class="col-sm-9">
+                        {{ form.contact_last_name|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <label for="{{ form.contact_email.id_for_label }}" class="col-sm-3 col-form-label fw-bold text-end">Email</label>
+                    <div class="col-sm-9">
+                        {{ form.contact_email|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <label for="{{ form.contact_phone_number.id_for_label }}" class="col-sm-3 col-form-label fw-bold text-end">Phone Number</label>
+                    <div class="col-sm-9">
+                        {{ form.contact_phone_number|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <label for="{{ form.contact_address.id_for_label }}" class="col-sm-3 col-form-label fw-bold text-end">Address</label>
+                    <div class="col-sm-9">
+                        {{ form.contact_address|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <label for="{{ form.notes.id_for_label }}" class="col-sm-3 col-form-label fw-bold text-end">Notes</label>
+                    <div class="col-sm-9">
+                        {{ form.notes|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <!-- Submit and Cancel Buttons -->
+                <div class="d-flex justify-content-center mt-4">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{% url 'state_county_directory' %}" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

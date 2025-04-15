@@ -1,19 +1,22 @@
 from pathlib import Path
 import os
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Initialize environment variables
+env = environ.Env()
+env.read_env(str(BASE_DIR / '.env'))  # Read the .env file
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+# Retrieve SECRET_KEY from .env file
+SECRET_KEY = env('SECRET_KEY')
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^%0(3u=6b^4z%p##watj7l6fof=g6#af*6msmmjc6wwz%!4!-&'
+# Debugging to print the SECRET_KEY and DEBUG after they have been loaded
+print("SECRET_KEY:", SECRET_KEY)
+print("DEBUG:", env('DEBUG', default=True))
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-
+# ALLOWED_HOSTS - Define which host/domain the site can be accessed from.
 ALLOWED_HOSTS = [
     'provideragencyportal.com',
     'www.provideragencyportal.com',
@@ -23,7 +26,6 @@ ALLOWED_HOSTS = [
 ]
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -31,8 +33,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'agency',
+    'accounts',
+    'agency.apps.AgencyConfig',
+    'widget_tweaks',
 ]
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -42,6 +48,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'agency.middleware.ClearMessagesOnLogoutMiddleware',
 ]
 
 ROOT_URLCONF = 'ProviderAgencyPortal.urls'
@@ -51,7 +58,6 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(BASE_DIR, 'agency', 'templates'),
-            os.path.join(BASE_DIR, 'agency', 'templates', 'registration'),  # Add this line
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -74,7 +80,6 @@ DATABASES = {
     }
 }
 
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -90,10 +95,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'America/Los_Angeles'
@@ -102,11 +103,8 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     BASE_DIR / "agency" / "static",
@@ -114,28 +112,18 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
+# Mailgun API credentials (from environment variables)
+MAILGUN_API_KEY = env('MAILGUN_API_KEY')
+MAILGUN_DOMAIN = env('MAILGUN_DOMAIN')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'email-smtp.us-east-2.amazonaws.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'AKIAU44WZPM4HX7GUHQJ'
-EMAIL_HOST_PASSWORD = 'BIeMVkdTmnosFWQNmSdGdAoivxA3fv9hmjJV5S7CzRyd'
-DEFAULT_FROM_EMAIL = 'noreply@provideragencyportal.com'
-SERVER_EMAIL = 'server@provideragencyportal.com'
+# Other settings
+DEBUG = env.bool('DEBUG', default=True)
 
 LOGIN_REDIRECT_URL = '/'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 LOGOUT_REDIRECT_URL = '/login/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
-
-
-
-
-

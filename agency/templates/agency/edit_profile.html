@@ -3,145 +3,505 @@
 {% load form_extras %}
 
 {% block content %}
-<div class="container my-4">
-    <h2>Edit Your Profile</h2>
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="id_contact_first_name" class="form-label">Contact first name:</label>
-                {{ form.contact_first_name|add_class:"form-control" }}
-            </div>
-            <div class="col-md-6 mb-3">
-                <label for="id_contact_last_name" class="form-label">Contact last name:</label>
-                {{ form.contact_last_name|add_class:"form-control" }}
-            </div>
-            <div class="col-md-6 mb-3">
-                <label for="id_contact_phone_number" class="form-label">Phone number:</label>
-                {{ form.contact_phone_number|add_class:"form-control" }}
-            </div>
-            <div class="col-md-6 mb-3">
-                <label for="id_contact_email" class="form-label">Email:</label>
-                {{ form.contact_email|add_class:"form-control" }}
-            </div>
-            <div class="col-12 mb-3">
-                <label for="id_contact_address" class="form-label">Address:</label>
-                {{ form.contact_address|add_class:"form-control" }}
-            </div>
-
-            <div class="col-12 mb-3">
-                <label for="id_contact_address" class="form-label">Address:</label>
-                {{ form.contact_address|add_class:"form-control" }}
-            </div>
-
-            <!-- Add Website input -->
-            <div class="col-12 mb-3">
-                <label for="id_website" class="form-label fw-bold">Website:</label>
-                {{ form.website|add_class:"form-control" }}
-            </div>
-
-
-        </div>
-
-        <div class="col-12 mb-3">
-            <label for="id_profile_image" class="form-label fw-bold">Upload a Logo or Photo: (optional)</label>
-            {{ form.profile_image }}
-        </div>
-
-
-        <div class="mb-3">
-            <label for="id_notes" class="form-label"><strong>Notes:</strong></label>
-            {{ form.notes }}
-            <small class="form-text text-muted">Max 300 characters.</small>
-        </div>
-
-        <!-- Referral Status -->
-        <div class="mb-4">
-            {{ form.referral_status.label_tag }} {{ form.referral_status }}
-        </div>
-
-        <!-- Services Section -->
-        <div id="services_section">
-            <h4 class="mt-4 mb-3"># of referrals you can accept for each service:</h4>
-            <div class="row">
-                {% for field in form.visible_fields %}
-                {% if "_referrals" in field.name and not field.name|slice:"-6:" == "_count" %}
-                <div class="col-md-6 d-flex align-items-center mb-3 service-group">
-                    <div class="form-check me-3">
-                        {{ field }} {{ field.label_tag }}
-                    </div>
-                    <div class="referral-count" id="{{ field.name }}_count_container">
-                        {% with count_field=field.name|add:'_count' %}
-                        {{ form|get_form_field:count_field }}
-                        {% endwith %}
-                    </div>
-                </div>
-                {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Submit Button -->
-        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
-
-        <!-- Error Messages -->
-        {% if form.errors %}
-        <div class="alert alert-danger mt-3">
-            <ul class="mb-0">
-                {% for field, errors in form.errors.items %}
-                {% for error in errors %}
-                <li><strong>{{ field|capfirst }}:</strong> {{ error }}</li>
-                {% endfor %}
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
-    </form>
-</div>
-
-<!-- Optional Styling -->
 <style>
-    .form-check-input {
-        margin-top: 0.3rem;
+    .shift-right {
+        margin-left: 15px; /* Moves the input 15px to the right */
+    }
+    html, body {
+        margin: 0;
+        padding: 0;
     }
 
-    .referral-count input[type="number"] {
-        width: 60px;
-        text-align: center;
+    body {
+        padding-top: 65px; /* <-- Add this line here */
     }
 
-    .form-check-label {
-        margin-left: 0.25rem;
+    .contact-actions {
+        display: flex;
+        justify-content: flex-start; /* Align buttons horizontally with space between them */
+        align-items: center;
+        gap: 20px; /* Space between the "Add Contact" and "Delete Contact" buttons */
+        margin-top: 10px; /* Adds some spacing between the buttons and the inputs */
     }
+
+    .delete-contact-btn {
+        color: red;
+        text-decoration: none;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+
+    header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-color: #007bff;
+    color: white;
+    z-index: 1000;
+    padding: 0.75rem 1rem;
+    margin: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* subtle shadow */
+}
+
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1em;
+    }
+
+    .info-comment {
+        color: #007bff;
+        font-size: 16px;
+        text-align: right;
+        margin-top: 1px;
+    }
+
+    .header-text {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    /* Keep the Add Contact button in the header */
+    .add-contact-btn-header {
+        position: absolute;
+        background-color: transparent;
+        color: white;
+        padding: 20px 20px;
+        border: none;
+        cursor: pointer;
+        margin-right: 1000px;
+    }
+    input#id_website {
+        width: 100%;
+        max-width: 500px;
+    }
+
+    /* Adjust container to make space for the header */
+    .container.my-4 {
+    margin-top: 100px; /* adjust as needed */
+}
+
 </style>
 
-<!-- Script: Toggle count fields -->
+<header class="bg-primary text-white p-3">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-6 d-flex align-items-center gap-3">
+                <strong class="fs-3">Edit Your Profile</strong>
+            </div>
+            <div class="col-md-6 d-flex justify-content-md-end align-items-center gap-3">
+
+                {{ request.user.display_name|default:request.user.email }}
+                <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm">Back</a>
+            </div>
+        </div>
+    </div>
+
+</header>
+<!--Display Agency Name for editing -->
+{% if request.user.userprofile.role == "provider" %}
+    <div class="row align-items-center mb-4">
+    <div class="col-md-6">
+        <label for="id_agency_name" class="form-label fw-bold" style="font-size: 1.125rem;">Agency Name:</label>
+        <input type="text" name="agency_name" id="id_agency_name" class="form-control" value="{{ form.agency_name.value|default_if_none:'' }}">
+    </div>
+    <div class="col-md-6 text-md-end">
+        <span style="color: #007bff; font-weight: 500; font-size: 1rem;">Scroll to the bottom to save changes.</span>
+    </div>
+</div>
+
+{% endif %}
+<div class="container my-4">
+
+    <form method="POST" enctype="multipart/form-data" id="profileForm" action="{% url 'edit_profile' %}">
+    {% csrf_token %}
+
+    <!-- Display Existing Contacts -->
+    {% if contacts %}
+    {% for contact in contacts %}
+        <div id="contact_{{ contact.id }}" class="contact-group mb-3">
+        <h5>Contact {{ forloop.counter }}</h5>
+
+    {% if forloop.counter > 1 %}
+    <div class="contact-actions">
+        <a href="javascript:void(0);" class="text-danger delete-contact-btn" onclick="deleteContact({{ contact.id }})">Delete Contact</a>
+    </div>
+    {% endif %}
+            <input type="hidden" name="contact_id_{{ contact.id }}" value="{{ contact.id }}">
+            <div class="row">
+                <!-- First Name -->
+                <div class="col-md-6 mb-3">
+                    <label for="contact_{{ contact.id }}_first_name" class="form-label">First Name:</label>
+                    <input type="text" name="contact_first_name_{{ contact.id }}" class="form-control" value="{{ contact.first_name }}">
+                </div>
+
+                <!-- Last Name -->
+                <div class="col-md-6 mb-3">
+                    <label for="contact_{{ contact.id }}_last_name" class="form-label">Last Name:</label>
+                    <input type="text" name="contact_last_name_{{ contact.id }}" class="form-control" value="{{ contact.last_name }}">
+                </div>
+
+                <!-- Phone Number -->
+                <div class="col-md-6 mb-3">
+                    <label for="contact_{{ contact.id }}_phone_number" class="form-label">Phone Number:</label>
+                    <input type="text" name="contact_phone_number_{{ contact.id }}" class="form-control" value="{{ contact.phone_number }}">
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6 mb-3">
+                    <label for="contact_{{ contact.id }}_email" class="form-label">Email:</label>
+                    <input type="email" name="contact_email_{{ contact.id }}" class="form-control" value="{{ contact.email }}">
+                </div>
+
+                <!-- Address -->
+                <div class="col-12 mb-3">
+                    <label for="contact_{{ contact.id }}_address" class="form-label">Address:</label>
+                    <input type="text" name="contact_address_{{ contact.id }}" class="form-control" value="{{ contact.address }}">
+                </div>
+
+                <!-- Contact Type -->
+                <div class="col-md-6 mb-3">
+                    <label for="contact_{{ contact.id }}_type" class="form-label">Contact Type:</label>
+                    <select name="contact_type_{{ contact.id }}" id="contact_{{ contact.id }}_type" class="form-control" onchange="toggleOtherServices({{ contact.id }})">
+                        <option value="residential_services" {% if contact.contact_type == 'residential_services' %} selected {% endif %}>Residential Services</option>
+                        <option value="behavior_services" {% if contact.contact_type == 'behavior_services' %} selected {% endif %}>Behavior Services</option>
+                        <option value="dsa_services" {% if contact.contact_type == 'dsa_services' %} selected {% endif %}>DSA Services</option>
+                        <option value="employment_services" {% if contact.contact_type == 'employment_services' %} selected {% endif %}>Employment Services</option>
+                        <option value="adult_foster_care" {% if contact.contact_type == 'adult_foster_care' %} selected {% endif %}>Adult Foster Care Services</option>
+                        <option value="other_services" {% if contact.contact_type == 'other_services' %} selected {% endif %}>Other Contact Type</option>
+                    </select>
+                </div>
+
+                <!-- Other Services Description -->
+                <div id="contact_{{ contact.id }}_other_service" class="col-12 mb-3" {% if contact.contact_type != "other_services" %}style="display: none;"{% endif %}>
+                    <label for="contact_{{ contact.id }}_other_service_desc" class="form-label">Other Description:</label>
+                    <input type="text" name="contact_other_service_desc_{{ contact.id }}" id="contact_{{ contact.id }}_other_service_desc" class="form-control" value="{{ contact.other_service_desc }}">
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <!-- If no contacts exist, show Contact 1 fields -->
+        <div id="contact_1" class="contact-group mb-3">
+            <h5>Contact 1</h5>
+            <div class="row">
+                <!-- First Name -->
+                <div class="col-md-6 mb-3">
+                    <label for="contact_1_first_name" class="form-label">First Name:</label>
+                    <input type="text" name="contact_first_name_1" class="form-control" value="{{ request.POST.contact_first_name_1 }}">
+                </div>
+
+                <!-- Last Name -->
+                <div class="col-md-6 mb-3">
+                    <label for="contact_1_last_name" class="form-label">Last Name:</label>
+                    <input type="text" name="contact_last_name_1" class="form-control" value="{{ request.POST.contact_last_name_1 }}">
+                </div>
+
+                <!-- Phone Number -->
+                <div class="col-md-6 mb-3">
+                    <label for="contact_1_phone_number" class="form-label">Phone Number:</label>
+                    <input type="text" name="contact_phone_number_1" class="form-control" value="{{ request.POST.contact_phone_number_1 }}">
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6 mb-3">
+                    <label for="contact_1_email" class="form-label">Email:</label>
+                    <input type="email" name="contact_email_1" class="form-control" value="{{ request.POST.contact_email_1 }}">
+                </div>
+
+                <!-- Address -->
+                <div class="col-12 mb-3">
+                    <label for="contact_1_address" class="form-label">Address:</label>
+                    <input type="text" name="contact_address_1" class="form-control" value="{{ request.POST.contact_address_1 }}">
+                </div>
+
+                <!-- Contact Type -->
+                <div class="col-md-6 mb-3">
+                    <label for="contact_1_type" class="form-label">Contact Type:</label>
+                    <select name="contact_type_1" class="form-control" onchange="toggleOtherServices(1)">
+                        <option value="residential_services">Residential Services</option>
+                        <option value="behavior_services">Behavior Services</option>
+                        <option value="dsa_services">DSA Services</option>
+                        <option value="employment_services">Employment Services</option>
+                        <option value="adult_foster_care">Adult Foster Care Services</option>
+                        <option value="other_services">Contact Type</option>
+                    </select>
+                </div>
+
+                <!-- Other Services Description -->
+                <div id="contact_{{ contact.id }}_other_service" class="col-12 mb-3" {% if contact.contact_type != "other_services" %}style="display: none;"{% endif %}>
+    <label for="contact_{{ contact.id }}_other_service_desc" class="form-label">Other Description:</label>
+    <input type="text" name="contact_other_service_desc_{{ contact.id }}" id="contact_{{ contact.id }}_other_service_desc" class="form-control" value="{{ contact.other_service_desc }}">
+</div>
+
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Add more contacts dynamically -->
+    <div id="additional-contacts"></div>
+
+    <!-- Add Contact button at the bottom of the contacts section -->
+    <div class="contact-actions">
+        <button type="button" class="btn btn-outline-success btn-sm" onclick="addContact()">Add Contact</button>
+    </div>
+<div class="row mb-3"></div>
+    <!-- Profile Image Section -->
+    <div class="col-12 mb-3">
+        <label for="id_profile_image" class="form-label fw-bold">Upload a Logo or Photo: (optional)</label>
+        {% if form.profile_image.value %}
+            <div>
+                <img src="{{ form.profile_image.value.url }}" alt="Profile Image" style="max-width: 200px;">
+                <p>Current Image</p>
+            </div>
+        {% endif %}
+        {{ form.profile_image }}
+         </div>
+        <div class="mb-3">
+            <label for="id_website" class="form-label fw-bold">Website (optional):</label>
+            {{ form.website }}
+        </div>
+
+
+    <div class="mb-3">
+        <label for="id_notes" class="form-label"><strong>Notes:</strong></label>
+        {{ form.notes }}
+        <small class="form-text text-muted">Max 300 characters.</small>
+    </div>
+
+    <!-- Referral Status -->
+    <div class="mb-4">
+    {{ form.referral_status.label_tag }} {{ form.referral_status }}
+    <div id="referral-warning" style="display:none; color:red; font-weight:bold; margin-top:5px;">
+        Please select at least one service type and enter a referral count.
+    </div>
+</div>
+
+    <!-- Services Section -->
+    <div id="services_section">
+        <h4 class="mt-4 mb-3"># of referrals you can accept for each service:</h4>
+        <div class="row">
+            {% for field in form.visible_fields %}
+            {% if "_referrals" in field.name and not field.name|slice:"-6:" == "_count" %}
+            <div class="col-md-6 d-flex align-items-center mb-3 service-group">
+                <div class="form-check me-3">
+                    {{ field }} {{ field.label_tag }}
+                </div>
+                <div class="referral-count" id="{{ field.name }}_count_container">
+                    {% with count_field=field.name|add:'_count' %}
+                    {{ form|get_form_field:count_field }}
+                    {% endwith %}
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+
+    <!-- Error Messages -->
+    {% if form.errors %}
+    <div class="alert alert-danger mt-3">
+        <ul class="mb-0">
+            {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+            <li><strong>{{ field|capfirst }}:</strong> {{ error }}</li>
+            {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</form>
+
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const referralSelect = document.getElementById("id_referral_status");
-        const servicesSection = document.getElementById("services_section");
+    let contactCount = {{ contacts|length|default:0 }}; // Start with the number of contacts currently in the database and defaults to 0 when no initial contacts
 
-        function updateServiceVisibility() {
-            const isAccepting = referralSelect.value === "accepting";
-            servicesSection.style.display = isAccepting ? "block" : "none";
-
-            if (!isAccepting) return;
-
-            document.querySelectorAll(".service-group").forEach(group => {
-                const checkbox = group.querySelector("input[type='checkbox']");
-                const countContainer = group.querySelector(".referral-count");
-
-                countContainer.style.display = checkbox.checked ? "block" : "none";
-
-                checkbox.addEventListener("change", function () {
-                    countContainer.style.display = checkbox.checked ? "block" : "none";
-                });
-            });
+    // Function to add a new contact
+    function addContact() {
+        if (contactCount >= 5) {
+            alert("You can only add up to 5 contacts.");
+            return;
         }
 
-        referralSelect.addEventListener("change", updateServiceVisibility);
-        updateServiceVisibility();  // Init on load
+        contactCount++;
+
+        const newContact = document.createElement('div');
+        newContact.id = `contact_${contactCount}`;
+        newContact.classList.add('contact-group', 'mb-3');
+        newContact.innerHTML = `
+            <h5>Contact ${contactCount}</h5>
+            <input type="hidden" name="contact_id_${contactCount}" value="">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="contact_${contactCount}_first_name" class="form-label">First Name:</label>
+                    <input type="text" name="contact_first_name_${contactCount}" class="form-control" id="contact_${contactCount}_first_name" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="contact_${contactCount}_last_name" class="form-label">Last Name:</label>
+                    <input type="text" name="contact_last_name_${contactCount}" class="form-control" id="contact_${contactCount}_last_name" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="contact_${contactCount}_phone_number" class="form-label">Phone Number:</label>
+                    <input type="text" name="contact_phone_number_${contactCount}" class="form-control">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="contact_${contactCount}_email" class="form-label">Email:</label>
+                    <input type="email" name="contact_email_${contactCount}" class="form-control">
+                </div>
+                <div class="col-12 mb-3">
+                    <label for="contact_${contactCount}_address" class="form-label">Address:</label>
+                    <input type="text" name="contact_address_${contactCount}" class="form-control">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="contact_${contactCount}_type" class="form-label">Contact Type:</label>
+                    <select name="contact_type_${contactCount}" id="contact_${contactCount}_type" class="form-control" onchange="toggleOtherServices(${contactCount})">
+                        <option value="residential_services">Residential Services</option>
+                        <option value="behavior_services">Behavior Services</option>
+                        <option value="dsa_services">DSA Services</option>
+                        <option value="employment_services">Employment Services</option>
+                        <option value="adult_foster_care">Adult Foster Care Services</option>
+                        <option value="other_services">Other Contact Type</option>
+                    </select>
+                </div>
+                <div id="contact_${contactCount}_other_service" class="col-12 mb-3" style="display:none;">
+                    <label for="contact_${contactCount}_other_service_desc" class="form-label">Other contact type description:</label>
+                    <input type="text" name="contact_other_service_desc_${contactCount}" class="form-control" maxlength="50">
+                </div>
+            </div>
+            <div class="contact-actions">
+                <a href="javascript:void(0);" onclick="deleteContact(${contactCount})" class="text-danger delete-contact-btn">Delete Contact</a>
+            </div>
+        `;
+
+        document.getElementById('additional-contacts').appendChild(newContact);
+    }
+
+    // Function to validate the form before submission
+    function validateForm() {
+    let isValid = true;
+
+    // 1. Validate Contact Fields
+    for (let i = 1; i <= contactCount; i++) {
+        const firstName = document.getElementById(`contact_${i}_first_name`);
+        const lastName = document.getElementById(`contact_${i}_last_name`);
+
+        if (firstName && lastName && (!firstName.value.trim() || !lastName.value.trim())) {
+            alert(`Please fill out both the First Name and Last Name for Contact ${i}.`);
+            return false;
+        }
+    }
+
+    // 2. Validate Referral Section (if accepting)
+const referralStatus = document.getElementById("id_referral_status").value;
+if (referralStatus === "accepting") {
+    const serviceCheckboxes = document.querySelectorAll('input[type="checkbox"][name*="_referrals"]');
+    const referralCounts = document.querySelectorAll('input[type="number"][name*="_referrals_count"]');
+
+    let validService = false;
+
+    serviceCheckboxes.forEach((checkbox, index) => {
+        if (checkbox.checked) {
+            const countInput = referralCounts[index];
+            if (countInput) {
+                const countValue = parseInt(countInput.value, 10);
+                if (countValue && countValue > 0) {
+                    validService = true;
+                }
+            }
+        }
     });
+
+    if (!validService) {
+        document.getElementById("referral-warning").style.display = "block";
+        return false;
+    } else {
+        document.getElementById("referral-warning").style.display = "none";
+    }
+}
+
+    return true; // this now handles both "accepting" and "not_accepting"
+}
+
+    // Function to show/hide the "Other service description" field based on the selected contact type
+    function toggleOtherServices(contactId) {
+    const typeSelect = document.querySelector(`[name="contact_type_${contactId}"]`);
+    const otherServiceDescField = document.getElementById(`contact_${contactId}_other_service`);
+
+    if (!typeSelect || !otherServiceDescField) return;
+
+    const selectedValue = typeSelect.value;
+
+    if (selectedValue === "other_services") {
+        otherServiceDescField.style.display = "block"; // Show the "Other Description" field
+    } else {
+        otherServiceDescField.style.display = "none"; // Hide it for other types
+    }
+}
+
+    // On form submission, check if the form is valid
+    document.getElementById("profileForm").onsubmit = function(event) {
+        if (!validateForm()) {
+            event.preventDefault(); // Prevent form submission if validation fails
+        }
+    };
 </script>
+
+    <script>
+// Call on page load for all contact blocks
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[id^=contact_type_]').forEach((select, index) => {
+        toggleOtherDesc(index);
+        select.addEventListener('change', () => toggleOtherDesc(index));
+    });
+});
+</script>
+
+    <script>
+function deleteContact(contactId) {
+    const contactEl = document.getElementById(`contact_${contactId}`);
+    if (contactEl) {
+        contactEl.remove();
+    }
+
+    // Optionally add a hidden field to track deleted contact ID if needed on the backend
+    const deletedInput = document.createElement("input");
+    deletedInput.type = "hidden";
+    deletedInput.name = "deleted_contact_ids";
+    deletedInput.value = contactId;
+    document.getElementById("profileForm").appendChild(deletedInput);
+}
+</script>
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const referralStatusSelect = document.getElementById("id_referral_status");
+    const serviceCheckboxes = document.querySelectorAll('input[type="checkbox"][name*="_referrals"]');
+    const referralCounts = document.querySelectorAll('input[type="number"][name*="_referrals_count"]');
+
+    function updateReferralFields() {
+        const isAccepting = referralStatusSelect.value === "accepting";
+
+        serviceCheckboxes.forEach(cb => {
+            cb.disabled = !isAccepting;
+            if (!isAccepting) cb.checked = false;
+        });
+
+        referralCounts.forEach(rc => {
+            rc.disabled = !isAccepting;
+            if (!isAccepting) rc.value = 0;
+        });
+    }
+
+    updateReferralFields(); // Called once on load
+    referralStatusSelect.addEventListener("change", updateReferralFields); // Updated on change
+});
+</script>
+
 {% endblock %}
